@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Available Providers</h2>
+
+{% if providers %}
+
+<ul class="list-group">
+
+    {% for provider in providers %}
+
+        <li class="list-group-item">
+
+            <strong>{{ provider.user.username }}</strong><br>
+            Phone: {{ provider.phone }}<br>
+            Location: {{ provider.location }}
+
+        </li>
+
+    {% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>No providers found for this service.</p>
+
+{% endif %}
+
+{% endblock %}
