@@ -1,25 +1,28 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from services.models import Service, Provider
 from .models import ServiceRequest
 
-
+@login_required
 def request_service(request):
 
     services = Service.objects.all()
 
     if request.method == "POST":
 
-        service_id = request.POST["service"]
-        description = request.POST["description"]
-        location = request.POST["location"]
+        service_name = request.POST.get("service_name")
+        description = request.POST.get("description")
+        location = request.POST.get("location")
 
-        service = Service.objects.get(id=service_id)
+        service, created = Service.objects.get_or_create(name=service_name)
 
-        service_request = ServiceRequest.objects.create(
+        service_request, created = ServiceRequest.objects.update_or_create(
             user=request.user,
             service=service,
-            description=description,
-            location=location
+            defaults={
+                "description": description,
+                "location": location
+            }
         )
 
         providers = Provider.objects.filter(service=service)

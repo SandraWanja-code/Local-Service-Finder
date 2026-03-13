@@ -5,27 +5,17 @@
 <h2>Available Providers</h2>
 
 {% if providers %}
-
-<ul class="list-group">
-
-    {% for provider in providers %}
-
-        <li class="list-group-item">
-
-            <strong>{{ provider.user.username }}</strong><br>
-            Phone: {{ provider.phone }}<br>
-            Location: {{ provider.location }}
-
-        </li>
-
-    {% endfor %}
-
-</ul>
-
+    <ul class="list-group">
+        {% for provider in providers %}
+            <li class="list-group-item">
+                <strong>{{ provider.user.username }}</strong><br>
+                Phone: {{ provider.phone|default:"N/A" }}<br>
+                Location: {{ provider.location|default:"N/A" }}
+            </li>
+        {% endfor %}
+    </ul>
 {% else %}
-
-<p>No providers found for this service.</p>
-
+    <p class="text-muted">No providers found for this service.</p>
 {% endif %}
 
 {% endblock %}

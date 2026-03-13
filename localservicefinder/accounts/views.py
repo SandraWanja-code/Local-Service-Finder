@@ -1,10 +1,8 @@
-
-
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import authenticate, login, logout
+
 
 def register(request):
 
@@ -13,19 +11,21 @@ def register(request):
         username = request.POST["username"]
         password = request.POST["password"]
 
+        # check if username exists
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists")
             return redirect("register")
 
+        # create user
         user = User.objects.create_user(username=username, password=password)
 
+        # automatically log them in
         login(request, user)
 
         return redirect("home")
 
     return render(request, "register.html")
 
-from django.contrib.auth import authenticate, login
 
 def login_view(request):
 
@@ -43,3 +43,8 @@ def login_view(request):
             messages.error(request, "Invalid username or password")
 
     return render(request, "login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("home")

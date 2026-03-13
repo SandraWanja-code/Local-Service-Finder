@@ -5,31 +5,48 @@
 <h2>Request a Service</h2>
 
 <form method="POST">
+{% csrf_token %}
 
-    {% csrf_token %}
+<div class="mb-3">
+<label>Service Needed</label>
 
-    <div class="mb-3">
-        <label>Service Needed</label>
-        <select name="service" class="form-control">
-            {% for service in services %}
-                <option value="{{ service.id }}">{{ service.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
+<input list="services" name="service_name" class="form-control" placeholder="Type or select service">
 
-    <div class="mb-3">
-        <label>Description</label>
-        <textarea name="description" class="form-control"></textarea>
-    </div>
+<datalist id="services">
+    {% for service in services %}
+        <option value="{{ service.name }}">
+    {% endfor %}
+</datalist>
 
-    <div class="mb-3">
-        <label>Location</label>
-        <input type="text" name="location" class="form-control">
-    </div>
+</div>
 
-    <button type="submit" class="btn btn-primary">
-        Submit Request
-    </button>
+<!-- <div class="mb-3">
+
+<label>Or Type Service</label>
+
+<input type="text" name="custom_service" class="form-control" placeholder="Example: Carpenter">
+
+</div> -->
+
+
+<div class="mb-3">
+
+<label>Description</label>
+
+<textarea name="description" class="form-control"></textarea>
+
+</div>
+
+
+<div class="mb-3">
+
+<label>Location</label>
+
+<input type="text" name="location" class="form-control">
+
+</div>
+
+<button type="submit" class="btn btn-primary">Submit</button>
 
 </form>
 
