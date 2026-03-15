@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{% if provider %}Edit{% else %}Register as{% endif %} Provider Info</h2>
+
+{% if success %}
+<div class="alert alert-success">
+    Your provider info has been {% if provider %}updated{% else %}saved{% endif %}!
+</div>
+{% endif %}
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label>Services You Offer</label>
+        <select name="services" class="form-control" multiple id="services-select">
+            {% for service in services %}
+                <option value="{{ service.id }}"
+                    {% if provider and service in provider.services.all %}selected{% endif %}>
+                    {{ service.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <small class="text-muted">Select existing or type new services</small>
+    </div>
+
+    <div class="mb-3">
+        <label>Phone Number</label>
+        <input type="text" name="phone"
+               class="form-control"
+               value="{% if provider %}{{ provider.phone }}{% endif %}">
+    </div>
+
+    <div class="mb-3">
+        <label>Location</label>
+        <input type="text" name="location"
+               class="form-control"
+               value="{% if provider %}{{ provider.location }}{% endif %}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        {% if provider %}Update{% else %}Register{% endif %} Info
+    </button>
+</form>
+
+<!-- Include jQuery and Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#services-select').select2({
+        tags: true,          // allow typing new options
+        tokenSeparators: [',', ' '], // type comma or space to create new
+        placeholder: "Select or type services"
+    });
+});
+</script>
+
+{% endblock %}
