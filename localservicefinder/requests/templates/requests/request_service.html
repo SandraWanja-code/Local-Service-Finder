@@ -5,10 +5,30 @@
 <h2>Request a Service</h2>
 
 {% if success %}
+
 <div class="alert alert-success">
     Your service request has been submitted!
 </div>
+
+<h3>Matching Providers</h3>
+
+{% if matching_providers %}
+<ul>
+{% for provider in matching_providers %}
+<li>
+<strong>{{ provider.user.username }}</strong><br>
+Location: {{ provider.location }}<br>
+Phone: {{ provider.phone }}
+</li>
+<br>
+{% endfor %}
+</ul>
+
+{% else %}
+<p>No providers found for this service yet.</p>
 {% endif %}
+
+{% else %}
 
 <form method="POST">
 {% csrf_token %}
@@ -19,47 +39,26 @@
 <input list="services" name="service_name" class="form-control" placeholder="Type or select service">
 
 <datalist id="services">
-    {% for service in services %}
-        <option value="{{ service.name }}">
-    {% endfor %}
+{% for service in services %}
+<option value="{{ service.name }}">
+{% endfor %}
 </datalist>
 
 </div>
 
 <div class="mb-3">
 <label>Description</label>
-
 <textarea name="description" class="form-control"></textarea>
-
 </div>
 
 <div class="mb-3">
 <label>Location</label>
-
 <input type="text" name="location" class="form-control">
-
 </div>
 
 <button type="submit" class="btn btn-primary">Submit</button>
 
 </form>
-
-
-{% if matching_providers %}
-<hr>
-
-<h3>Matching Providers</h3>
-
-<ul>
-{% for provider in matching_providers %}
-<li>
-<strong>{{ provider.user.username }}</strong> <br>
-Location: {{ provider.location }} <br>
-Phone: {{ provider.phone }}
-</li>
-<br>
-{% endfor %}
-</ul>
 
 {% endif %}
 
