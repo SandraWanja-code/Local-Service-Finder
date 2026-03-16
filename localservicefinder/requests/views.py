@@ -3,10 +3,13 @@ from django.contrib.auth.decorators import login_required
 from services.models import Service, Provider
 from .models import ServiceRequest
 
+
 @login_required
 def request_service(request):
 
     services = Service.objects.all()
+    matching_providers = None
+    success = False
 
     if request.method == "POST":
 
@@ -14,23 +17,26 @@ def request_service(request):
         description = request.POST.get("description")
         location = request.POST.get("location")
 
+        # find service or create if user typed new one
         service, created = Service.objects.get_or_create(name=service_name)
 
-        service_request, created = ServiceRequest.objects.update_or_create(
+        # save request
+        ServiceRequest.objects.create(
             user=request.user,
             service=service,
-            defaults={
-                "description": description,
-                "location": location
-            }
+            location=location,
+            description=description
         )
 
-        providers = Provider.objects.filter(service=service)
+        # MATCHING STEP
+        matching_providers = Provider.objects.filter(
+            services=service
+        )
 
-        return render(request, "requests/matched_providers.html", {
-            "providers": providers
-        })
+        success = True
 
     return render(request, "requests/request_service.html", {
-        "services": services
+        "services": services,
+        "success": success,
+        "matching_providers": matching_providers
     })
