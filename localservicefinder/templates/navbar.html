@@ -13,30 +13,42 @@
           <a class="nav-link" href="/requests/request/">Request Service</a>
         </li>
 
-        {% if user.is_authenticated %}
-            {% if user.provider %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'edit_provider' %}">Edit Provider Info</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'become_provider' %}">provide Service</a>
-                </li>
-            {% endif %}
+       {% if user.is_authenticated %}
 
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-            </li>
+    {% if user.provider %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'edit_provider' %}">Edit Provider Info</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'provider_dashboard' %}">Provider Dashboard</a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'become_provider' %}">Provide Service</a>
+        </li>
+    {% endif %}
 
-        {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="/accounts/register/">Register</a>
-            </li>
+    {% if user.is_authenticated and not user.provider %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'customer_requests' %}">My Requests</a>
+</li>
+{% endif %}
 
-            <li class="nav-item">
-              <a class="nav-link" href="/accounts/login/">Login</a>
-            </li>
-        {% endif %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+    </li>
+
+{% else %}
+
+    <li class="nav-item">
+      <a class="nav-link" href="/accounts/register/">Register</a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="/accounts/login/">Login</a>
+    </li>
+
+{% endif %}
 
       </ul>
     </div>

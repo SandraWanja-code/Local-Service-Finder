@@ -2,25 +2,26 @@
 
 {% block content %}
 
-{% if user.is_authenticated %}
+<!-- Welcome Section -->
 
-<h2>Welcome {{ user.username }} 👋</h2>
+<div class="p-5 mb-4 bg-light rounded text-center">
 
-<p>You are logged in to the Local Service Finder.</p>
+<h1>Welcome {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %} 👋</h1>
 
-<a href="/requests/request/" class="btn btn-primary">
+<p class="lead">
+Find trusted local service providers near you.
+</p>
+
+<a href="/requests/request/" class="btn btn-primary btn-lg me-2">
 Request a Service
 </a>
 
-{% else %}
+<a href="/services/become-provider/" class="btn btn-success btn-lg">
+Provide a Service
+</a>
 
-<h2>Welcome to Local Service Finder</h2>
+</div>
 
-<p>Please login or register to continue.</p>
 
-<a href="/accounts/login/" class="btn btn-success">Login</a>
-<a href="/accounts/register/" class="btn btn-primary">Register</a>
-
-{% endif %}
 
 {% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>My Service Requests</h2>
+
+{% if requests %}
+<ul class="list-group">
+    {% for r in requests %}
+    <li class="list-group-item">
+        <strong>Service:</strong> {{ r.service.name }} <br>
+        <strong>Location:</strong> {{ r.location }} <br>
+        <strong>Description:</strong> {{ r.description }} <br>
+        <strong>Date:</strong> {{ r.created_at }} <br>
+        <strong>Status:</strong>
+        {% if r.status == 'pending' %}
+            <span class="badge bg-warning">Pending</span>
+        {% elif r.status == 'accepted' %}
+            <span class="badge bg-success">Accepted</span>
+        {% else %}
+            <span class="badge bg-danger">Declined</span>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You have not made any requests yet.</p>
+{% endif %}
+
+{% endblock %}

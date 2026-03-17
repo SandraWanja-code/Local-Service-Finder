@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>{{ provider.user.username }}</h2>
+
+<p><strong>Location:</strong> {{ provider.location }}</p>
+
+<p><strong>Phone:</strong> {{ provider.phone }}</p>
+
+<h4>Services Offered</h4>
+
+<ul>
+{% for service in provider.services.all %}
+<li>{{ service.name }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

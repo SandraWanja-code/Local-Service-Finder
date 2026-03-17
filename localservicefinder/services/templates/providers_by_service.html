@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Providers for {{ service.name }}</h2>
+
+{% if providers %}
+
+<ul>
+{% for provider in providers %}
+
+<li>
+
+<a href="{% url 'provider_profile' provider.id %}">
+<strong>{{ provider.user.username }}</strong>
+</a>
+
+<br>
+Location: {{ provider.location }}
+<br>
+Phone: {{ provider.phone }}
+
+</li>
+
+<br>
+
+{% endfor %}
+</ul>
+
+{% else %}
+
+<p>No providers available for this service.</p>
+
+{% endif %}
+
+{% endblock %}

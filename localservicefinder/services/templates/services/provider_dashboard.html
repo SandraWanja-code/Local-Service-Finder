@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Provider Dashboard</h2>
+
+<h4>Incoming Service Requests</h4>
+
+{% if requests %}
+
+<ul class="list-group">
+
+{% for r in requests %}
+
+<li class="list-group-item">
+
+<strong>Service:</strong> {{ r.service.name }} <br>
+<strong>Location:</strong> {{ r.location }} <br>
+<strong>Description:</strong> {{ r.description }} <br>
+<strong>Requested by:</strong> {{ r.user.username }} <br>
+<strong>Date:</strong> {{ r.created_at }}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>No requests yet.</p>
+
+{% endif %}
+
+{% endblock %}
