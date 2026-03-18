@@ -123,8 +123,19 @@ def provider_dashboard(request):
         "requests": requests
     })
     
-    # def customer_requests(request):
-    #   requests = ServiceRequest.objects.filter(user=request.user).order_by('-created_at')
-    # #   return render(request, "services/customer_requests.html", {      "requests": requests
+def customer_requests(request):
+      requests = ServiceRequest.objects.filter(user=request.user).order_by('_created_at')
+      return render(request, "services/customer_requests.html", { "requests": requests
 
-    # })
+    })
+
+def my_services(request):
+    services = Service.objects.filter(provider__user=request.user)
+    return render(request, 'services/my_services.html', {'services': services})
+
+
+
+def delete_service(request, id):
+    service = get_object_or_404(Service, id=id, provider__user=request.user)
+    service.delete()
+    return redirect('my_services')

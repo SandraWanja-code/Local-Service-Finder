@@ -29,10 +29,10 @@
     {% endif %}
 
     {% if user.is_authenticated and not user.provider %}
-<li class="nav-item">
+<!-- <li class="nav-item">
     <a class="nav-link" href="{% url 'customer_requests' %}">My Requests</a>
 </li>
-{% endif %}
+{% endif %} -->
 
     <li class="nav-item">
       <a class="nav-link" href="{% url 'logout' %}">Logout</a>
