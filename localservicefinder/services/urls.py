@@ -10,6 +10,6 @@ path("service/<int:service_id>/", views.providers_by_service, name="providers_by
 
 path("provider/<int:provider_id>/", views.provider_profile, name="provider_profile"),
 path("dashboard/", views.provider_dashboard, name="provider_dashboard"),
-# path("my-requests/", views.customer_requests, name="customer_requests"),
+path("my-requests/", views.customer_requests, name="customer_requests"),
 
 ]
