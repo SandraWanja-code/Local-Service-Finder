@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+ <h2>My Services</h2>
+
+    <!-- <a href="{% url 'add_service' %}">➕ Add New Service</a> -->
+
+    <hr>
+
+    {% if services %}
+        {% for service in services %}
+            <div style="margin-bottom: 20px;">
+                <h3>{{ service.name }}</h3>
+                <p>{{ service.description }}</p>
+
+                <a href="{% url 'edit_service' service.id %}"> Edit</a>
+                |
+                <a href="{% url 'delete_service' service.id %}"
+                   onclick="return confirm('Are you sure you want to delete this service?');">
+                    Delete
+                </a>
+            </div>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>You have not added any services yet.</p>
+    {% endif %}
+    {% endblock %}

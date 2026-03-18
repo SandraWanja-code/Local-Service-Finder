@@ -26,4 +26,5 @@ path('', TemplateView.as_view(template_name="home.html"), name="home"),
     
     path('requests/', include('requests.urls')),
     path("services/", include("services.urls")),
+    path('', include('services.urls')),
 ]
