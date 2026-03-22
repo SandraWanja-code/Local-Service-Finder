@@ -3,34 +3,50 @@
 
 <h2 style="color:#007bff;">Incoming Service Requests</h2>
 
-{% if requests %}
-    {% for req in requests %}
-    <div style="background-color:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #dee2e6;">
-        <p><strong>Customer:</strong> {{ req.user.username }}</p>
-        <p><strong>Service:</strong> {{ req.service.name }}</p>
-        <p><strong>Description:</strong> {{ req.description }}</p>
-        <p><strong>Location:</strong> {{ req.location }}</p>
-        <p><strong>Status:</strong> {{ req.status }}</p>
-        <p><strong>Requested At:</strong> {{ req.requested_at|date:"M d, Y H:i" }}</p>
+<div id="requests-container">
+    {% if requests %}
+        {% for req in requests %}
+        <div style="background-color:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #dee2e6;">
+            <p><strong>Customer:</strong> {{ req.user.username }}</p>
+            <p><strong>Service:</strong> {{ req.service.name }}</p>
+            <p><strong>Description:</strong> {{ req.description }}</p>
+            <p><strong>Location:</strong> {{ req.location }}</p>
+            <p><strong>Status:</strong> {{ req.status }}</p>
+            <p><strong>Requested At:</strong> {{ req.requested_at|date:"M d, Y H:i" }}</p>
 
-        {% if req.status == 'pending' %}
-            <form method="POST" style="margin-top:10px;">
-                {% csrf_token %}
-                <input type="hidden" name="request_id" value="{{ req.id }}">
-                <button name="action" value="accept" style="background-color:#28a745; color:white; border:none; padding:6px 10px; border-radius:5px;">Accept</button>
-                <button name="action" value="decline" style="background-color:#dc3545; color:white; border:none; padding:6px 10px; border-radius:5px;">Decline</button>
-            </form>
-        {% elif req.status == 'accepted' %}
-            <form method="POST" style="margin-top:10px;">
-                {% csrf_token %}
-                <input type="hidden" name="request_id" value="{{ req.id }}">
-                <button name="action" value="complete" style="background-color:#007bff; color:white; border:none; padding:6px 10px; border-radius:5px;">Mark Completed</button>
-            </form>
-        {% endif %}
-    </div>
-    {% endfor %}
-{% else %}
-<p>No incoming requests yet.</p>
-{% endif %}
+            {% if req.status == 'pending' %}
+                <form method="POST" style="margin-top:10px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                    <button name="action" value="accept" style="background-color:#28a745; color:white; border:none; padding:6px 10px; border-radius:5px;">Accept</button>
+                    <button name="action" value="decline" style="background-color:#dc3545; color:white; border:none; padding:6px 10px; border-radius:5px;">Decline</button>
+                </form>
+            {% elif req.status == 'accepted' %}
+                <form method="POST" style="margin-top:10px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                    <button name="action" value="complete" style="background-color:#007bff; color:white; border:none; padding:6px 10px; border-radius:5px;">Mark Completed</button>
+                </form>
+            {% endif %}
+
+            {% if req.status == "completed" %}
+                <p><strong>Payment:</strong> {{ req.payment_status }}</p>
+                
+                {% if req.rating %}
+                <p>
+                    ⭐ Customer Rating: 
+                    {% for i in "12345"|slice:":req.rating"|make_list %}
+                        ⭐
+                    {% endfor %}
+                    ({{ req.rating }}/5)
+                </p>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No incoming requests yet.</p>
+    {% endif %}
+</div>
 
 {% endblock %}

@@ -48,3 +48,13 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("home")
+
+
+
+def delete_account(request):
+    user = request.user
+    logout(request)
+    user.delete()
+
+    messages.success(request, "Your account has been deleted.")
+    return redirect("home")

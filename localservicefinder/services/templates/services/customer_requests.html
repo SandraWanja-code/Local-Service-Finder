@@ -3,6 +3,7 @@
 
 <h2 style="text-align:center; margin-bottom: 20px; color:#007bff;">My Service Requests</h2>
 
+<div style="max-height: 600px; overflow-y: auto; padding-right: 5px;">
 {% for req in requests %}
 <div style="
     border:1px solid #ddd;
@@ -13,54 +14,31 @@
     box-shadow:0 2px 8px rgba(0,0,0,0.05);
 ">
 
-    <!-- Service Name -->
     <p><strong>Service:</strong> {{ req.service.name }}</p>
-
-    <!-- Status -->
     <p><strong>Status:</strong> 
-        {% if req.status == "pending" %}
-            <span style="color:orange; font-weight:bold;">Pending</span>
-        {% elif req.status == "accepted" %}
-            <span style="color:#007bff; font-weight:bold;">Accepted</span>
-        {% elif req.status == "completed" %}
-            <span style="color:green; font-weight:bold;">Completed</span>
-        {% elif req.status == "declined" %}
-            <span style="color:red; font-weight:bold;">Declined</span>
-        {% endif %}
+        {% if req.status == "pending" %}<span style="color:orange; font-weight:bold;">Pending</span>
+        {% elif req.status == "accepted" %}<span style="color:#007bff; font-weight:bold;">Accepted</span>
+        {% elif req.status == "completed" %}<span style="color:green; font-weight:bold;">Completed</span>
+        {% elif req.status == "declined" %}<span style="color:red; font-weight:bold;">Declined</span>{% endif %}
     </p>
-
-    <!-- Requested Date -->
     <p><strong>Date:</strong> {{ req.requested_at|date:"M d, Y H:i" }}</p>
 
-    <!-- Accepted Stage: Provider Info -->
-    {% if req.status == "accepted" %}
-        {% if req.provider %}
-            <div style="margin-top:12px; padding:12px; background:#eaf4ff; border-radius:8px; border-left:4px solid #007bff;">
-                <p style="margin:0; font-weight:bold;">📞 Provider Accepted – Contact them</p>
-                <p style="margin:5px 0;">
-                    Name: <strong>{{ req.provider.user.get_full_name|default:req.provider.user.username }}</strong><br>
-                    Phone: <strong>{{ req.provider.phone }}</strong>
-                </p>
-            </div>
-        {% else %}
-            <p style="color:#888; margin-top:10px;">No provider assigned yet</p>
-        {% endif %}
+    {% if req.status == "accepted" and req.provider %}
+        <div style="margin-top:12px; padding:12px; background:#eaf4ff; border-radius:8px; border-left:4px solid #007bff;">
+            <p style="margin:0; font-weight:bold;">📞 Provider Accepted – Contact them</p>
+            <p style="margin:5px 0;">
+                Name: <strong>{{ req.provider.user.get_full_name|default:req.provider.user.username }}</strong><br>
+                Phone: <strong>{{ req.provider.phone }}</strong>
+            </p>
+        </div>
     {% endif %}
 
-    <!-- Completed Stage: Payment -->
     {% if req.status == "completed" %}
         {% if req.payment_status == "unpaid" %}
             <form method="POST" style="margin-top:15px;">
                 {% csrf_token %}
                 <input type="hidden" name="pay_id" value="{{ req.id }}">
-                <button type="submit" style="
-                    background:#28a745; 
-                    color:white; 
-                    padding:10px 20px; 
-                    border:none; 
-                    border-radius:6px; 
-                    font-weight:bold; 
-                    cursor:pointer;">
+                <button type="submit" style="background:#28a745; color:white; padding:10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
                     💰 Pay with M-Pesa
                 </button>
             </form>
@@ -69,14 +47,58 @@
         {% endif %}
     {% endif %}
 
-    <!-- Pending -->
-    {% if req.status == "pending" %}
-        <p style="color:#777; margin-top:10px;">⏳ Waiting for provider to accept</p>
+    {% if req.status == "completed" %}
+        {% if req.payment_status == "paid" %}
+            {% if not req.rating %}
+                <form method="POST" style="margin-top:10px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="rate_id" value="{{ req.id }}">
+                    <label>Rate service:</label>
+                    <select name="rating" required>
+                        <option value="">Select</option>
+                        <option value="1">⭐ 1</option>
+                        <option value="2">⭐⭐ 2</option>
+                        <option value="3">⭐⭐⭐ 3</option>
+                        <option value="4">⭐⭐⭐⭐ 4</option>
+                        <option value="5">⭐⭐⭐⭐⭐ 5</option>
+                    </select>
+                    <button type="submit">Submit Rating</button>
+                </form>
+            {% else %}
+                <p>
+                    Your Rating: 
+                    {% for i in "12345"|slice:":req.rating"|make_list %}
+                        ⭐
+                    {% endfor %}
+                    ({{ req.rating }}/5)
+                </p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    <!-- Delete button -->
+    {% if req.status == "pending" or req.status == "declined" %}
+        <form method="POST" action="{% url 'delete_request' req.id %}" style="margin-top:10px;">
+            {% csrf_token %}
+            <button type="submit" style="background:#dc3545; color:white; padding:6px 12px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">
+                🗑 Delete Request
+            </button>
+        </form>
+    {% elif req.status == "completed" %}
+        {% if req.payment_status == "paid" %}
+            <form method="POST" action="{% url 'delete_request' req.id %}" style="margin-top:10px;">
+                {% csrf_token %}
+                <button type="submit" style="background:#dc3545; color:white; padding:6px 12px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">
+                    🗑 Delete Request
+                </button>
+            </form>
+        {% endif %}
     {% endif %}
 
 </div>
 {% empty %}
 <p style="text-align:center; color:#777;">You have no service requests yet.</p>
 {% endfor %}
+</div>
 
 {% endblock %}

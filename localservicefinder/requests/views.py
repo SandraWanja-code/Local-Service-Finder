@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from services.models import Service, Provider
 from .models import ServiceRequest
 from django.contrib import messages
+from django.utils import timezone
 
 # ===============================
 # REQUEST A SERVICE
@@ -25,13 +26,18 @@ def request_service(request):
                 user=request.user,
                 service=service,
                 location=location,
-                description=description
+                description=description,
+                requested_at=timezone.now()  # track time of request
             )
-              # ✅ Add flash message
-        messages.success(request, "Your service request has been submitted!")
-    return redirect("customer_requests")
+
+            messages.success(request, "Your service request has been submitted!")
+            return redirect("customer_requests")  # go to customer's requests after submission
+
+        else:
+            messages.error(request, "Please select a service before submitting.")
 
     return render(request, "requests/request_service.html", {"services": services})
+
 
 # ===============================
 # CUSTOMER REQUESTS (VIEW + PAY)
@@ -48,6 +54,7 @@ def customer_requests(request):
         return JsonResponse({"success": True})
 
     return render(request, "requests/customer_requests.html", {"requests": requests_qs})
+
 
 # ===============================
 # PROVIDER DASHBOARD (VIEW + ACCEPT/DECLINE/COMPLETE)
@@ -73,3 +80,13 @@ def provider_dashboard(request):
         return redirect("provider_dashboard")
 
     return render(request, "requests/provider_dashboard.html", {"requests": requests_qs})
+# -----------------------------
+# DELETE REQUEST (Soft Delete)
+# -----------------------------
+@login_required
+def delete_request(request, request_id):
+    req = get_object_or_404(ServiceRequest, id=request_id, user=request.user)
+    req.deleted = True
+    req.save()
+    messages.success(request, "Request deleted successfully!")
+    return redirect("customer_requests")
