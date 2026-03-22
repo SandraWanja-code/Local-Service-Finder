@@ -1,36 +1,20 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>Become a Service Provider</h2>
 
-{% if success %}
-<div class="alert alert-success">
-    You are now registered as a service provider!
-</div>
-{% else %}
-<form method="POST">
+<h2 style="color: #007bff; margin-bottom: 20px;">Register as a Provider</h2>
+
+<form method="POST" enctype="multipart/form-data" style="background-color:#f7f9fc; padding:20px; border-radius:10px; max-width:400px;">
     {% csrf_token %}
+    <label>Phone Number:</label><br>
+    <input type="text" name="phone" placeholder="Enter phone number" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"><br>
 
-    <div class="mb-3">
-        <label>Service You Offer</label>
-        <select name="service" class="form-control" multiple>
-            {% for service in services %}
-            <option value="{{ service.id }}">{{ service.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
+    <label>Location:</label><br>
+    <input type="text" name="location" placeholder="Enter your location" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"><br>
 
-    <div class="mb-3">
-        <label>Phone Number</label>
-        <input type="text" name="phone" class="form-control">
-    </div>
+    <label>Profile Picture:</label><br>
+    <input type="file" name="profile_pic" style="margin-bottom:10px;"><br>
 
-    <div class="mb-3">
-        <label>Location</label>
-        <input type="text" name="location" class="form-control">
-    </div>
-
-    <button type="submit" class="btn btn-success">Register as Provider</button>
+    <button type="submit" style="background-color:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px;">Register</button>
 </form>
-{% endif %}
+
 {% endblock %}

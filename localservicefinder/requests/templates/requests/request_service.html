@@ -16,9 +16,17 @@
 <ul>
 {% for provider in matching_providers %}
 <li>
+
 <strong>{{ provider.user.username }}</strong><br>
 Location: {{ provider.location }}<br>
-Phone: {{ provider.phone }}
+Phone: {{ provider.phone }}<br>
+
+{% if provider.profile_image %}
+    <img src="{{ provider.profile_image.url }}" width="120" style="margin-top:10px;">
+{% else %}
+    <p>No image available</p>
+{% endif %}
+
 </li>
 <br>
 {% endfor %}
@@ -30,19 +38,18 @@ Phone: {{ provider.phone }}
 
 {% else %}
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 {% csrf_token %}
 
 <div class="mb-3">
-<label>Service Needed</label>
+<label>Select Service</label>
 
-<input list="services" name="service_name" class="form-control" placeholder="Type or select service">
-
-<datalist id="services">
-{% for service in services %}
-<option value="{{ service.name }}">
-{% endfor %}
-</datalist>
+<select name="service_id" class="form-control" required>
+    <option value="">-- Choose a service --</option>
+    {% for service in services %}
+        <option value="{{ service.id }}">{{ service.name }}</option>
+    {% endfor %}
+</select>
 
 </div>
 
