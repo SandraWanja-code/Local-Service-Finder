@@ -12,4 +12,5 @@ urlpatterns = [
     path("provider/<int:provider_id>/", views.provider_profile, name="provider_profile"),
     path("dashboard/", views.provider_dashboard, name="provider_dashboard"),
     path("my-request/", views.customer_requests, name="customer_requests"),
+    path('delete-account/', views.delete_account, name='delete_account'),
 ]

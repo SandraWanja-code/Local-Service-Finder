@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-
+ 
 <h2 class="text-primary">My Profile</h2>
 
-<form method="POST" enctype="multipart/form-data" class="p-4 mb-4 bg-light rounded shadow-sm" style="max-width:500px;">
+<form method="POST" enctype="multipart/form-data" class="p-4 mb-4  bg-light rounded shadow-sm" style="max-width:500px; ">
     {% csrf_token %}
     <label>Phone:</label>
     <input type="text" name="phone" value="{{ provider.phone }}" class="form-control mb-2">
@@ -11,9 +11,7 @@
     <label>Location:</label>
     <input type="text" name="location" value="{{ provider.location }}" class="form-control mb-2">
 
-    <label>Profile Picture:</label>
-    <input type="file" name="profile_pic" class="form-control mb-3">
-
+  
     <button type="submit" name="update_profile" class="btn btn-success">Update Profile</button>
 </form>
 
@@ -34,7 +32,7 @@
 
 <h2 class="text-primary">Manage My Services</h2>
 {% for service in provider.services.all %}
-<div class="p-3 mb-3 bg-secondary text-white rounded shadow-sm d-flex justify-content-between align-items-center">
+<div class="p-3 mb-3 bg-secondary text-white rounded shadow-sm d-flex justify-content-between align-items-center " style="width: 500px; ">
     <div>
         <strong>{{ service.name }}</strong><br>
         <small>{{ service.description }}</small>
@@ -45,6 +43,7 @@
         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
     </form>
 </div>
+
 {% empty %}
 <p>No services added yet.</p>
 {% endfor %}

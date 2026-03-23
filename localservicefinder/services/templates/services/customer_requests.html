@@ -86,12 +86,13 @@
         </form>
     {% elif req.status == "completed" %}
         {% if req.payment_status == "paid" %}
-            <form method="POST" action="{% url 'delete_request' req.id %}" style="margin-top:10px;">
-                {% csrf_token %}
-                <button type="submit" style="background:#dc3545; color:white; padding:6px 12px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">
-                    🗑 Delete Request
-                </button>
-            </form>
+            <form method="POST" style="margin-top:10px;">
+    {% csrf_token %}
+    <input type="hidden" name="delete_id" value="{{ req.id }}">
+    <button type="submit" style="background:#dc3545; color:white; padding:6px 12px; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">
+        🗑 Delete Request
+    </button>
+</form>
         {% endif %}
     {% endif %}
 

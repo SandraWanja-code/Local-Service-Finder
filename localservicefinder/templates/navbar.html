@@ -1,7 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container">
     <a class="navbar-brand fw-bold" href="/">Local Service Finder</a>
-
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -15,51 +14,43 @@
         </li>
 
         {% if user.is_authenticated %}
-
-            <!-- CUSTOMER -->
-            {% if not user.is_provider %}
-                <li class="nav-item">
-                  <a class="nav-link" href="/requests/request/">Request Service</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'customer_requests' %}">My Requests</a>
-                </li>
-                <li class="nav-item">
-               
-                </li>
-            {% endif %}
-
+          {% if user.is_provider %}
             <!-- PROVIDER -->
-            {% if user.is_provider %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'my_services' %}">My Services</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'provider_dashboard' %}">Dashboard</a>
-                </li>
-            {% endif %}
-
-            <!-- Logout -->
-            <li class="nav-item ms-3">
-              <a class="btn btn-danger btn-sm" href="{% url 'logout' %}">Logout</a>
-            </li><li class="nav-item ms-2">
-  <a class="btn btn-outline-light btn-sm" href="{% url 'delete_account' %}">
-    Delete Account
-  </a>
-</li>
-
-        {% else %}
-
-            <!-- Guests -->
             <li class="nav-item">
-              <a class="nav-link" href="/accounts/register/">Register</a>
+              <a class="nav-link {% if request.path == '/my-services/' %}active{% endif %}" href="{% url 'my_services' %}">My Services</a>
             </li>
-            <li class="nav-item ms-2">
-              <a class="btn btn-success btn-sm" href="/accounts/login/">Login</a>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'provider_dashboard' %}">Dashboard</a>
             </li>
+          {% else %}
+            <!-- CUSTOMER -->
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == '/requests/request/' %}active{% endif %}" href="/requests/request/">Request Service</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == '/my-request/' %}active{% endif %}" href="{% url 'customer_requests' %}">My Requests</a>
+            </li>
+          {% endif %}
 
+          <!-- Logout & Delete -->
+          <li class="nav-item ms-2">
+            <a class="btn btn-danger btn-sm" href="{% url 'logout' %}">Logout</a>
+          </li>
+          <li class="nav-item ms-2">
+            <form method="POST" action="{% url 'delete_account' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">Delete Account</button>
+            </form>
+          </li>
+        {% else %}
+          <!-- Guests -->
+          <li class="nav-item">
+            <a class="nav-link" href="/accounts/register/">Register</a>
+          </li>
+          <li class="nav-item ms-2">
+            <a class="btn btn-success btn-sm" href="/accounts/login/">Login</a>
+          </li>
         {% endif %}
-
       </ul>
     </div>
   </div>
