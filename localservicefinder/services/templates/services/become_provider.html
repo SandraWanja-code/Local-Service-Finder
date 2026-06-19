@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 style="color: #007bff; margin-bottom: 20px;">Register as a Provider</h2>
+
+<form method="POST" enctype="multipart/form-data" style="background-color:#f7f9fc; padding:20px; border-radius:10px; max-width:400px;">
+    {% csrf_token %}
+    <label>Phone Number:</label><br>
+    <input type="text" name="phone" placeholder="Enter phone number" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"><br>
+
+    <label>Location:</label><br>
+    <input type="text" name="location" placeholder="Enter your location" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"><br>
+
+    <label>Profile Picture:</label><br>
+    <input type="file" name="profile_pic" style="margin-bottom:10px;"><br>
+
+    <button type="submit" style="background-color:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px;">Register</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Welcome Section -->
+
+<div class="p-5 mb-4 bg-light rounded text-center">
+
+<h1>Welcome {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %} 👋</h1>
+
+<p class="lead">
+Find trusted local service providers near you.
+</p>
+
+<a href="/requests/request/" class="btn btn-primary btn-lg me-2">
+Request a Service
+</a>
+
+<a href="/services/become-provider/" class="btn btn-success btn-lg">
+Provide a Service
+</a>
+
+
+</div>
+
+
+
+{% endblock %}

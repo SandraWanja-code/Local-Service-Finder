@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Request a Service</h2>
+
+{% if success %}
+
+<div class="alert alert-success">
+    Your service request has been submitted!
+</div>
+
+<h3>Matching Providers</h3>
+
+{% if matching_providers %}
+<ul>
+{% for provider in matching_providers %}
+<li>
+
+<strong>{{ provider.user.username }}</strong><br>
+Location: {{ provider.location }}<br>
+Phone: {{ provider.phone }}<br>
+
+{% if provider.profile_image %}
+    <img src="{{ provider.profile_image.url }}" width="120" style="margin-top:10px;">
+{% else %}
+    <p>No image available</p>
+{% endif %}
+
+</li>
+<br>
+{% endfor %}
+</ul>
+
+{% else %}
+<p>No providers found for this service yet.</p>
+{% endif %}
+
+{% else %}
+
+<form method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+
+<div class="mb-3">
+<label>Select Service</label>
+
+<select name="service_id" class="form-control" required>
+    <option value="">-- Choose a service --</option>
+    {% for service in services %}
+        <option value="{{ service.id }}">{{ service.name }}</option>
+    {% endfor %}
+</select>
+
+</div>
+
+<div class="mb-3">
+<label>Description</label>
+<textarea name="description" class="form-control"></textarea>
+</div>
+
+<div class="mb-3">
+<label>Location</label>
+<input type="text" name="location" class="form-control">
+</div>
+
+<button type="submit" class="btn btn-primary">Submit</button>
+
+</form>
+
+{% endif %}
+
+{% endblock %}
