@@ -3,7 +3,23 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import ClientProfile
+from django.contrib.sessions.models import Session
+from django.utils import timezone
+from .models import ClientProfile, SessionLog
+
+
+def _client_ip(request):
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR")
+
+
+def _remove_other_sessions(user, current_session_key):
+    for session in Session.objects.filter(expire_date__gte=timezone.now()):
+        data = session.get_decoded()
+        if str(user.id) == str(data.get("_auth_user_id")) and session.session_key != current_session_key:
+            session.delete()
 
 
 def register(request):
@@ -42,6 +58,14 @@ def register(request):
 
         # automatically log them in
         login(request, user)
+        _remove_other_sessions(user, request.session.session_key)
+        SessionLog.objects.create(
+            user=user,
+            action="login",
+            session_key=request.session.session_key or "",
+            ip_address=_client_ip(request),
+        )
+        messages.success(request, "Account created successfully. Confirmation message sent to your email address.")
 
         return redirect("home")
 
@@ -69,6 +93,13 @@ def login_view(request):
                 return redirect("login")
 
             login(request, user)
+            _remove_other_sessions(user, request.session.session_key)
+            SessionLog.objects.create(
+                user=user,
+                action="login",
+                session_key=request.session.session_key or "",
+                ip_address=_client_ip(request),
+            )
             return redirect("home")
         else:
             messages.error(request, "Invalid username or password")
@@ -77,6 +108,13 @@ def login_view(request):
 
 
 def logout_view(request):
+    if request.user.is_authenticated:
+        SessionLog.objects.create(
+            user=request.user,
+            action="logout",
+            session_key=request.session.session_key or "",
+            ip_address=_client_ip(request),
+        )
     logout(request)
     return redirect("home")
 

@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q
 from services.models import Service, Provider
-from .models import ServiceRequest
+from .models import PaymentRecord, ProviderSelection, SearchHistory, ServiceRequest, TransactionLog
+from accounts.models import AccessLog
 from django.contrib import messages
 from django.utils import timezone
 
@@ -33,6 +34,15 @@ def request_service(request):
     if location_query:
         providers = providers.filter(location__icontains=location_query)
 
+    if request.method == "GET" and (service_id or location_query):
+        selected_service = Service.objects.filter(id=service_id).first() if service_id else None
+        SearchHistory.objects.create(
+            user=request.user,
+            service=selected_service,
+            location=location_query,
+            results_count=providers.distinct().count(),
+        )
+
     if request.method == "POST":
         service_id = request.POST.get("service_id")
         provider_id = request.POST.get("provider_id")
@@ -51,6 +61,11 @@ def request_service(request):
                     services=service,
                     approval_status="approved",
                     is_available=True,
+                )
+                ProviderSelection.objects.create(
+                    user=request.user,
+                    provider=provider,
+                    service=service,
                 )
 
             # create request without assigning provider yet
@@ -86,6 +101,11 @@ def request_service(request):
 @login_required
 def customer_requests(request):
     requests_qs = ServiceRequest.objects.filter(user=request.user).order_by("-requested_at")
+    AccessLog.objects.create(
+        user=request.user,
+        action="booking_history_view",
+        details="Customer viewed booking history.",
+    )
 
     if request.method == "POST":
         pay_id = request.POST.get("pay_id")
@@ -139,6 +159,18 @@ def provider_dashboard(request):
                 req.mpesa_code = request.POST.get("mpesa_code", "")
                 req.payment_status = "paid"
                 req.payment_recorded_at = timezone.now()
+                payment = PaymentRecord.objects.create(
+                    service_request=req,
+                    recorded_by=request.user,
+                    payment_method=req.payment_method,
+                    amount_paid=req.amount_paid,
+                    mpesa_code=req.mpesa_code,
+                )
+                TransactionLog.objects.create(
+                    payment_record=payment,
+                    action="payment_recorded",
+                    performed_by=request.user,
+                )
 
         req.save()
         return redirect("provider_dashboard")

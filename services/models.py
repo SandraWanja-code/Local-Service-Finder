@@ -47,6 +47,44 @@ class Provider(models.Model):
     def __str__(self):
         return self.user.username
 
+
+class ApprovalRecord(models.Model):
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE, related_name="approval_records")
+    status = models.CharField(max_length=20, choices=Provider.APPROVAL_CHOICES)
+    decided_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.provider.user.username} - {self.status}"
+
+
+class ServiceCatalogueLog(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="catalogue_logs")
+    action = models.CharField(max_length=100)
+    performed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.service.name} - {self.action}"
+
+
+class SystemReport(models.Model):
+    title = models.CharField(max_length=120)
+    generated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user_count = models.PositiveIntegerField(default=0)
+    provider_count = models.PositiveIntegerField(default=0)
+    booking_count = models.PositiveIntegerField(default=0)
+    paid_transaction_count = models.PositiveIntegerField(default=0)
+    total_revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    average_rating = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(blank=True)
+    generated_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
 # -------------------------------
 # SERVICE REQUEST MODEL
 # -------------------------------

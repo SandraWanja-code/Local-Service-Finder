@@ -13,6 +13,43 @@ class ClientProfile(models.Model):
         return self.user.username
 
 
+class SessionLog(models.Model):
+    ACTION_CHOICES = [
+        ("login", "Login"),
+        ("logout", "Logout"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="session_logs")
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    session_key = models.CharField(max_length=80, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} {self.action} at {self.created_at}"
+
+
+class AccessLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="access_logs")
+    action = models.CharField(max_length=100)
+    details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action}"
+
+
+class UserManagementLog(models.Model):
+    admin_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="management_actions")
+    target_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="management_logs")
+    action = models.CharField(max_length=100)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.action}: {self.target_user.username}"
+
+
 # ------------------------------
 # Add helper properties to User
 # ------------------------------

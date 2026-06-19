@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Sum
 from .models import Service, Provider
-from requests.models import ServiceRequest
+from requests.models import PaymentRecord, ServiceRequest, TransactionLog
+from accounts.models import AccessLog
 
 
 # ===============================
@@ -116,6 +117,7 @@ def provider_dashboard(request):
     provider = get_object_or_404(Provider, user=request.user)
     if provider.approval_status != "approved":
         messages.warning(request, "Your provider profile is waiting for administrator approval.")
+        return redirect("my_services")
 
     requests_qs = ServiceRequest.objects.filter(
         service__in=provider.services.all()
@@ -164,6 +166,18 @@ def provider_dashboard(request):
                 req.payment_status = "paid"
                 from django.utils import timezone
                 req.payment_recorded_at = timezone.now()
+                payment = PaymentRecord.objects.create(
+                    service_request=req,
+                    recorded_by=request.user,
+                    payment_method=req.payment_method,
+                    amount_paid=req.amount_paid,
+                    mpesa_code=req.mpesa_code,
+                )
+                TransactionLog.objects.create(
+                    payment_record=payment,
+                    action="payment_recorded",
+                    performed_by=request.user,
+                )
                 messages.success(request, "Payment details recorded.")
 
         req.save()
@@ -207,6 +221,12 @@ def providers_by_service(request, service_id):
 # ===============================
 def provider_profile(request, provider_id):
     provider = get_object_or_404(Provider, id=provider_id)
+    if request.user.is_authenticated:
+        AccessLog.objects.create(
+            user=request.user,
+            action="provider_profile_view",
+            details=f"Viewed provider {provider.user.username}.",
+        )
 
     return render(request, "services/provider_profile.html", {
         "provider": provider
