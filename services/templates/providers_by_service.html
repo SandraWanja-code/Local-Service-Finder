@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Providers for {{ service.name }}</h2>
+
+<form method="GET" class="mb-3">
+    <label>Filter by location</label>
+    <input type="text" name="location" value="{{ location }}" class="form-control mb-2" placeholder="Example: Nairobi">
+    <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+{% if providers %}
+
+<ul>
+{% for provider in providers %}
+
+<li>
+
+<a href="{% url 'provider_profile' provider.id %}">
+<strong>{{ provider.user.username }}</strong>
+</a>
+
+<br>
+Location: {{ provider.location }}
+<br>
+Phone: {{ provider.phone }}
+<br>
+Rating: {{ provider.average_rating|floatformat:1|default:"No ratings yet" }}
+{% if provider.hourly_rate %}
+<br>
+Price Guide: KSh {{ provider.hourly_rate }}
+{% endif %}
+
+</li>
+
+<br>
+
+{% endfor %}
+</ul>
+
+{% else %}
+
+<p>No providers available for this service.</p>
+
+{% endif %}
+
+{% endblock %}
