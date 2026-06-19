@@ -1,1 +1,21 @@
 env
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+env/
+venv/
+
+# Database
+db.sqlite3
+
+# Backup files
+*.bak
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
