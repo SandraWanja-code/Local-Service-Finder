@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Sum
 from .models import Service, Provider
-from requests.models import PaymentRecord, ServiceRequest, TransactionLog
+from requests.models import ServiceRequest
+from payments.models import PaymentRecord, TransactionLog
 from accounts.models import AccessLog
-
 
 # ===============================
 # BECOME PROVIDER

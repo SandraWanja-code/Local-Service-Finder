@@ -2,23 +2,26 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q
-from services.models import Service, Provider
-from .models import PaymentRecord, ProviderSelection, SearchHistory, ServiceRequest, TransactionLog
-from accounts.models import AccessLog
 from django.contrib import messages
 from django.utils import timezone
+
+from services.models import Service, Provider
+from .models import ServiceRequest, SearchHistory, ProviderSelection
+from accounts.models import AccessLog
+
 
 # ===============================
 # REQUEST A SERVICE
 # ===============================
 @login_required
 def request_service(request):
-    services = Service.objects.filter(is_active=True)  # available services
+    services = Service.objects.filter(is_active=True)
     providers = Provider.objects.filter(approval_status="approved", is_available=True)
 
     service_id = request.GET.get("service_id")
     selected_provider_id = request.GET.get("provider_id")
     location_query = request.GET.get("location", "").strip()
+
     if selected_provider_id:
         selected_provider = get_object_or_404(
             Provider,
@@ -27,15 +30,19 @@ def request_service(request):
             is_available=True,
         )
         providers = providers.filter(id=selected_provider.id)
+
         if not service_id and selected_provider.services.exists():
             service_id = str(selected_provider.services.first().id)
+
     if service_id:
         providers = providers.filter(services__id=service_id)
+
     if location_query:
         providers = providers.filter(location__icontains=location_query)
 
     if request.method == "GET" and (service_id or location_query):
         selected_service = Service.objects.filter(id=service_id).first() if service_id else None
+
         SearchHistory.objects.create(
             user=request.user,
             service=selected_service,
@@ -54,6 +61,7 @@ def request_service(request):
         if service_id:
             service = get_object_or_404(Service, id=service_id)
             provider = None
+
             if provider_id:
                 provider = get_object_or_404(
                     Provider,
@@ -62,13 +70,13 @@ def request_service(request):
                     approval_status="approved",
                     is_available=True,
                 )
+
                 ProviderSelection.objects.create(
                     user=request.user,
                     provider=provider,
                     service=service,
                 )
 
-            # create request without assigning provider yet
             ServiceRequest.objects.create(
                 user=request.user,
                 service=service,
@@ -77,11 +85,10 @@ def request_service(request):
                 description=description,
                 requested_date=requested_date,
                 requested_time=requested_time,
-                requested_at=timezone.now()  # track time of request
             )
 
             messages.success(request, "Your service request has been submitted!")
-            return redirect("customer_requests")  # go to customer's requests after submission
+            return redirect("customer_requests")
 
         else:
             messages.error(request, "Please select a service before submitting.")
@@ -96,11 +103,12 @@ def request_service(request):
 
 
 # ===============================
-# CUSTOMER REQUESTS (VIEW + PAY)
+# CUSTOMER REQUESTS (VIEW + PAY STATUS ONLY)
 # ===============================
 @login_required
 def customer_requests(request):
     requests_qs = ServiceRequest.objects.filter(user=request.user).order_by("-requested_at")
+
     AccessLog.objects.create(
         user=request.user,
         action="booking_history_view",
@@ -110,19 +118,24 @@ def customer_requests(request):
     if request.method == "POST":
         pay_id = request.POST.get("pay_id")
         req = get_object_or_404(ServiceRequest, id=pay_id, user=request.user)
+
         req.payment_status = "paid"
         req.save()
+
         return JsonResponse({"success": True})
 
-    return render(request, "requests/customer_requests.html", {"requests": requests_qs})
+    return render(request, "requests/customer_requests.html", {
+        "requests": requests_qs
+    })
 
 
 # ===============================
-# PROVIDER DASHBOARD (VIEW + ACCEPT/DECLINE/COMPLETE)
+# PROVIDER DASHBOARD
 # ===============================
 @login_required
 def provider_dashboard(request):
     provider = get_object_or_404(Provider, user=request.user)
+
     requests_qs = ServiceRequest.objects.filter(
         service__in=provider.services.all()
     ).filter(
@@ -135,54 +148,35 @@ def provider_dashboard(request):
             id=request.POST.get("request_id"),
             service__in=provider.services.all()
         )
+
         action = request.POST.get("action")
 
         if action == "accept":
-            if req.status != "pending":
-                return redirect("provider_dashboard")
+            if req.status == "pending":
+                req.status = "accepted"
+                req.provider = provider
 
-            req.status = "accepted"
-            req.provider = provider  # assign current provider
         elif action == "decline":
-            if req.status != "pending":
-                return redirect("provider_dashboard")
+            if req.status == "pending":
+                req.status = "declined"
+                req.decline_reason = request.POST.get("decline_reason", "")
 
-            req.status = "declined"
-            req.decline_reason = request.POST.get("decline_reason", "")
         elif action == "complete":
             if req.status == "accepted" and req.provider == provider:
                 req.status = "completed"
-        elif action == "record_payment":
-            if req.status == "completed" and req.provider == provider:
-                req.payment_method = request.POST.get("payment_method", "")
-                req.amount_paid = request.POST.get("amount_paid") or None
-                req.mpesa_code = request.POST.get("mpesa_code", "")
-                req.payment_status = "paid"
-                req.payment_recorded_at = timezone.now()
-                payment = PaymentRecord.objects.create(
-                    service_request=req,
-                    recorded_by=request.user,
-                    payment_method=req.payment_method,
-                    amount_paid=req.amount_paid,
-                    mpesa_code=req.mpesa_code,
-                )
-                TransactionLog.objects.create(
-                    payment_record=payment,
-                    action="payment_recorded",
-                    performed_by=request.user,
-                )
 
         req.save()
         return redirect("provider_dashboard")
 
-    return render(request, "requests/provider_dashboard.html", {"requests": requests_qs})
-# -----------------------------
-# DELETE REQUEST (Soft Delete)
-# -----------------------------
+
+# ===============================
+# DELETE REQUEST (SOFT DELETE)
+# ===============================
 @login_required
 def delete_request(request, request_id):
     req = get_object_or_404(ServiceRequest, id=request_id, user=request.user)
     req.deleted = True
     req.save()
+
     messages.success(request, "Request deleted successfully!")
     return redirect("customer_requests")
