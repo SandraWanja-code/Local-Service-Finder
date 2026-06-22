@@ -115,6 +115,7 @@ def my_services(request):
 @login_required
 def provider_dashboard(request):
     provider = get_object_or_404(Provider, user=request.user)
+
     if provider.approval_status != "approved":
         messages.warning(request, "Your provider profile is waiting for administrator approval.")
         return redirect("my_services")
@@ -123,7 +124,7 @@ def provider_dashboard(request):
         service__in=provider.services.all()
     ).filter(
         Q(status="pending") | Q(provider=provider)
-    ).order_by('-requested_at')
+    ).order_by("-requested_at")
 
     if request.method == "POST":
         req_id = request.POST.get("request_id")
@@ -136,22 +137,16 @@ def provider_dashboard(request):
         )
 
         if action == "accept":
-            if req.status != "pending":
-                messages.error(request, "Only pending requests can be accepted.")
-                return redirect("provider_dashboard")
-
-            req.status = "accepted"
-            req.provider = provider
-            messages.success(request, "Request accepted successfully.")
+            if req.status == "pending":
+                req.status = "accepted"
+                req.provider = provider
+                messages.success(request, "Request accepted successfully.")
 
         elif action == "decline":
-            if req.status != "pending":
-                messages.error(request, "Only pending requests can be declined.")
-                return redirect("provider_dashboard")
-
-            req.status = "declined"
-            req.decline_reason = request.POST.get("decline_reason", "")
-            messages.warning(request, "Request declined.")
+            if req.status == "pending":
+                req.status = "declined"
+                req.decline_reason = request.POST.get("decline_reason", "")
+                messages.warning(request, "Request declined.")
 
         elif action == "complete":
             if req.status == "accepted" and req.provider == provider:
@@ -160,40 +155,39 @@ def provider_dashboard(request):
 
         elif action == "record_payment":
             if req.status == "completed" and req.provider == provider:
-                req.payment_method = request.POST.get("payment_method", "")
-                req.amount_paid = request.POST.get("amount_paid") or None
-                req.mpesa_code = request.POST.get("mpesa_code", "")
-                req.payment_status = "paid"
-                from django.utils import timezone
-                req.payment_recorded_at = timezone.now()
+
+                payment_method = request.POST.get("payment_method", "")
+                amount_paid = request.POST.get("amount_paid") or 0
+                mpesa_code = request.POST.get("mpesa_code", "")
+
                 payment = PaymentRecord.objects.create(
                     service_request=req,
                     recorded_by=request.user,
-                    payment_method=req.payment_method,
-                    amount_paid=req.amount_paid,
-                    mpesa_code=req.mpesa_code,
+                    payment_method=payment_method,
+                    amount_paid=amount_paid,
+                    mpesa_code=mpesa_code,
                 )
+
                 TransactionLog.objects.create(
                     payment_record=payment,
                     action="payment_recorded",
                     performed_by=request.user,
                 )
-                messages.success(request, "Payment details recorded.")
+
+                req.payment_status = "paid"
+                messages.success(request, "Payment recorded successfully.")
 
         req.save()
         return redirect("provider_dashboard")
 
-    earnings = ServiceRequest.objects.filter(
-        provider=provider,
-        status="completed",
-        payment_status="paid"
+    earnings = PaymentRecord.objects.filter(
+        service_request__provider=provider
     ).aggregate(total=Sum("amount_paid"))["total"] or 0
 
     return render(request, "services/provider_dashboard.html", {
         "requests": requests_qs,
         "earnings": earnings,
     })
-
 
 # ===============================
 # PROVIDERS BY SERVICE
