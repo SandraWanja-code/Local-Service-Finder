@@ -6,12 +6,17 @@ from .models import Service, Provider
 from requests.models import ServiceRequest
 from payments.models import PaymentRecord, TransactionLog
 from accounts.models import AccessLog
+from accounts.decorators import client_required, provider_required, approved_provider_required
 
 # ===============================
 # BECOME PROVIDER
 # ===============================
 @login_required
 def become_provider(request):
+    if request.user.is_staff:
+        messages.error(request, "Administrators do not need provider profiles.")
+        return redirect("admin_dashboard")
+
     provider = Provider.objects.filter(user=request.user).first()
 
     if provider:
@@ -49,12 +54,8 @@ def become_provider(request):
 # ===============================
 # MY SERVICES (PROVIDER ONLY)
 # ===============================
-@login_required
+@provider_required
 def my_services(request):
-    if not hasattr(request.user, 'provider'):
-        messages.error(request, "You must be a provider to access this page.")
-        return redirect("home")
-
     provider = request.user.provider
     all_services = Service.objects.filter(is_active=True)
 
@@ -112,18 +113,14 @@ def my_services(request):
 # ===============================
 # PROVIDER DASHBOARD
 # ===============================
-@login_required
+@approved_provider_required
 def provider_dashboard(request):
     provider = get_object_or_404(Provider, user=request.user)
-
-    if provider.approval_status != "approved":
-        messages.warning(request, "Your provider profile is waiting for administrator approval.")
-        return redirect("my_services")
 
     requests_qs = ServiceRequest.objects.filter(
         service__in=provider.services.all()
     ).filter(
-        Q(status="pending") | Q(provider=provider)
+        Q(status="pending", provider__isnull=True) | Q(status="pending", provider=provider) | Q(provider=provider)
     ).order_by("-requested_at")
 
     if request.method == "POST":
@@ -131,9 +128,10 @@ def provider_dashboard(request):
         action = request.POST.get("action")
 
         req = get_object_or_404(
-            ServiceRequest,
+            ServiceRequest.objects.filter(
+                service__in=provider.services.all()
+            ).filter(Q(provider__isnull=True) | Q(provider=provider)),
             id=req_id,
-            service__in=provider.services.all()
         )
 
         if action == "accept":
@@ -148,8 +146,13 @@ def provider_dashboard(request):
                 req.decline_reason = request.POST.get("decline_reason", "")
                 messages.warning(request, "Request declined.")
 
-        elif action == "complete":
+        elif action == "in_progress":
             if req.status == "accepted" and req.provider == provider:
+                req.status = "in_progress"
+                messages.success(request, "Service marked as in progress.")
+
+        elif action == "complete":
+            if req.status in ["accepted", "in_progress"] and req.provider == provider:
                 req.status = "completed"
                 messages.success(request, "Service marked as completed.")
 
@@ -230,10 +233,11 @@ def provider_profile(request, provider_id):
 # ===============================
 # CUSTOMER REQUESTS
 # ===============================
-@login_required
+@client_required
 def customer_requests(request):
     requests_qs = ServiceRequest.objects.filter(
-        user=request.user
+        user=request.user,
+        deleted=False,
     ).select_related("service").order_by("-requested_at")
 
     if request.method == "POST":

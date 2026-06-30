@@ -1,72 +1,59 @@
 {% extends "base.html" %}
+{% block title %}My Services | Local Service Finder{% endblock %}
 {% block content %}
- 
-<h2 class="text-primary">My Profile</h2>
-
-<form method="POST" enctype="multipart/form-data" class="p-4 mb-4  bg-light rounded shadow-sm" style="max-width:500px; ">
-    {% csrf_token %}
-    <label>Phone:</label>
-    <input type="text" name="phone" value="{{ provider.phone }}" class="form-control mb-2">
-
-    <label>Location:</label>
-    <input type="text" name="location" value="{{ provider.location }}" class="form-control mb-2">
-
-    <label>Credentials:</label>
-    <textarea name="credentials" class="form-control mb-2">{{ provider.credentials }}</textarea>
-
-    <label>Portfolio:</label>
-    <textarea name="portfolio" class="form-control mb-2">{{ provider.portfolio }}</textarea>
-
-    <label>Hourly Rate / Price Guide:</label>
-    <input type="number" step="0.01" name="hourly_rate" value="{{ provider.hourly_rate|default_if_none:'' }}" class="form-control mb-2">
-
-    <label>Availability:</label>
-    <textarea name="availability" class="form-control mb-2">{{ provider.availability }}</textarea>
-
-    <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" name="is_available" id="is_available" {% if provider.is_available %}checked{% endif %}>
-        <label class="form-check-label" for="is_available">Available for bookings</label>
-    </div>
-
-    <label>Profile Image:</label>
-    <input type="file" name="profile_image" class="form-control mb-2">
-
-    <p><strong>Approval Status:</strong> {{ provider.get_approval_status_display }}</p>
-  
-    <button type="submit" name="update_profile" class="btn btn-success">Update Profile</button>
-</form>
-
-<h2 class="text-primary">Add Service</h2>
-<form method="POST" class="p-4 mb-4 bg-light rounded shadow-sm" style="max-width:500px;">
-    {% csrf_token %}
-      <label>Select a Service</label>
-    <select name="service_id" class="form-select mb-3">
-        <option value="">-- Choose a service --</option>
-        {% for svc in all_services %}
-            <option value="{{ svc.id }}">{{ svc.name }}</option>
-        {% endfor %}
-    </select>
-    
-    <textarea name="description" placeholder="Description (optional)" class="form-control mb-2"></textarea>
-    <button type="submit" class="btn btn-primary">Add Service</button>
-</form>
-
-<h2 class="text-primary">Manage My Services</h2>
-{% for service in provider.services.all %}
-<div class="p-3 mb-3 bg-secondary text-white rounded shadow-sm d-flex justify-content-between align-items-center " style="width: 500px; ">
-    <div>
-        <strong>{{ service.name }}</strong><br>
-        <small>{{ service.description }}</small>
-    </div>
-    <form method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="delete_id" value="{{ service.id }}">
-        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-    </form>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1 class="section-title mb-1">Provider Profile and Services</h1><p class="muted mb-0">Keep your provider information, availability, and service catalogue up to date.</p></div>
+    <a href="{% url 'provider_dashboard' %}" class="btn btn-primary"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
 </div>
 
-{% empty %}
-<p>No services added yet.</p>
-{% endfor %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <form method="POST" enctype="multipart/form-data" class="panel">
+            {% csrf_token %}
+            <input type="hidden" name="update_profile" value="1">
+            <h4>Profile</h4>
+            <label class="form-label">Phone</label><input type="text" name="phone" value="{{ provider.phone }}" class="form-control mb-3">
+            <label class="form-label">Location</label><input type="text" name="location" value="{{ provider.location }}" class="form-control mb-3">
+            <label class="form-label">Credentials</label><textarea name="credentials" class="form-control mb-3" rows="3">{{ provider.credentials }}</textarea>
+            <label class="form-label">Portfolio</label><textarea name="portfolio" class="form-control mb-3" rows="3">{{ provider.portfolio }}</textarea>
+            <label class="form-label">Hourly rate / price guide</label><input type="number" step="0.01" name="hourly_rate" value="{{ provider.hourly_rate|default_if_none:'' }}" class="form-control mb-3">
+            <label class="form-label">Availability</label><textarea name="availability" class="form-control mb-3" rows="3">{{ provider.availability }}</textarea>
+            <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" name="is_available" id="is_available" {% if provider.is_available %}checked{% endif %}><label class="form-check-label" for="is_available">Available for bookings</label></div>
+            <label class="form-label">Profile image</label><input type="file" name="profile_image" class="form-control mb-3">
+            <p><strong>Approval:</strong> <span class="status-badge status-{{ provider.approval_status }}">{{ provider.get_approval_status_display }}</span></p>
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+    </div>
+    <div class="col-lg-7">
+        <form method="POST" class="panel mb-4">
+            {% csrf_token %}
+            <h4>Add Service</h4>
+            <label class="form-label">Select a service</label>
+            <select name="service_id" class="form-select mb-3">
+                <option value="">Choose a service</option>
+                {% for svc in all_services %}<option value="{{ svc.id }}">{{ svc.name }}</option>{% endfor %}
+            </select>
+            <label class="form-label">Or create a new service</label>
+            <input type="text" name="service_name" class="form-control mb-3" placeholder="Example: Plumbing">
+            <textarea name="description" placeholder="Description for new service" class="form-control mb-3"></textarea>
+            <button type="submit" class="btn btn-primary">Add Service</button>
+        </form>
 
+        <div class="panel">
+            <h4>My Services</h4>
+            {% for service in provider.services.all %}
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 border-top py-3">
+                    <div><strong>{{ service.name }}</strong><div class="muted small">{{ service.description|default:"No description" }}</div></div>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="delete_id" value="{{ service.id }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm" data-confirm="Remove this service from your profile?"><i class="bi bi-trash me-1"></i>Remove</button>
+                    </form>
+                </div>
+            {% empty %}
+                <div class="text-center py-5"><i class="bi bi-grid h1 text-primary"></i><h5>No services added yet</h5><p class="muted mb-0">Add at least one service so clients can find you.</p></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

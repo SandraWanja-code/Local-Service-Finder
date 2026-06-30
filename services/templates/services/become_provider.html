@@ -1,32 +1,28 @@
 {% extends "base.html" %}
+{% block title %}Become a Provider | Local Service Finder{% endblock %}
 {% block content %}
-
-<h2 style="color: #007bff; margin-bottom: 20px;">Register as a Provider</h2>
-
-<form method="POST" enctype="multipart/form-data" style="background-color:#f7f9fc; padding:20px; border-radius:10px; max-width:400px;">
-    {% csrf_token %}
-    <label>Phone Number:</label><br>
-    <input type="text" name="phone" placeholder="Enter phone number" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"><br>
-
-    <label>Work Area / Location:</label><br>
-    <input type="text" name="location" placeholder="Enter your work area" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;" required><br>
-
-    <label>Credentials:</label><br>
-    <textarea name="credentials" placeholder="Training, licenses, experience" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"></textarea><br>
-
-    <label>Portfolio:</label><br>
-    <textarea name="portfolio" placeholder="Examples of previous work" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"></textarea><br>
-
-    <label>Hourly Rate / Price Guide:</label><br>
-    <input type="number" step="0.01" name="hourly_rate" placeholder="Example: 1500" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"><br>
-
-    <label>Availability:</label><br>
-    <textarea name="availability" placeholder="Example: Mon-Sat, 8am-6pm" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc;"></textarea><br>
-
-    <label>Profile Picture:</label><br>
-    <input type="file" name="profile_image" style="margin-bottom:10px;"><br>
-
-    <button type="submit" style="background-color:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px;">Register</button>
-</form>
-
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="panel fade-in">
+            <div class="mb-4">
+                <span class="feature-icon mb-3"><i class="bi bi-person-plus"></i></span>
+                <h1 class="section-title h2">Become a Provider</h1>
+                <p class="muted mb-0">Submit your profile for administrator approval. Once approved, clients can send requests for your services.</p>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">Location</label><input type="text" name="location" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">Hourly rate / price guide</label><input type="number" step="0.01" name="hourly_rate" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Profile image</label><input type="file" name="profile_image" class="form-control"></div>
+                    <div class="col-12"><label class="form-label">Credentials</label><textarea name="credentials" class="form-control" rows="4" placeholder="Licenses, experience, certifications"></textarea></div>
+                    <div class="col-12"><label class="form-label">Portfolio</label><textarea name="portfolio" class="form-control" rows="4" placeholder="Past projects, links, references"></textarea></div>
+                    <div class="col-12"><label class="form-label">Availability</label><textarea name="availability" class="form-control" rows="3" placeholder="Example: Weekdays 8am-5pm"></textarea></div>
+                </div>
+                <button class="btn btn-primary mt-4" type="submit">Submit Application</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

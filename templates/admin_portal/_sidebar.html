@@ -1,0 +1,10 @@
+<aside class="sidebar panel">
+    <div class="small text-uppercase fw-bold muted mb-2">Admin Portal</div>
+    <a class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i> Overview</a>
+    <a class="{% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}" href="{% url 'admin_users' %}"><i class="bi bi-people"></i> Users</a>
+    <a class="{% if request.resolver_match.url_name == 'admin_providers' %}active{% endif %}" href="{% url 'admin_providers' %}"><i class="bi bi-person-check"></i> Providers</a>
+    <a class="{% if request.resolver_match.url_name == 'admin_services' %}active{% endif %}" href="{% url 'admin_services' %}"><i class="bi bi-grid"></i> Services</a>
+    <a class="{% if request.resolver_match.url_name == 'admin_requests' %}active{% endif %}" href="{% url 'admin_requests' %}"><i class="bi bi-list-task"></i> Requests</a>
+    <a class="{% if request.resolver_match.url_name == 'admin_reports' %}active{% endif %}" href="{% url 'admin_reports' %}"><i class="bi bi-bar-chart"></i> Reports</a>
+    <a class="{% if request.resolver_match.url_name == 'admin_settings' %}active{% endif %}" href="{% url 'admin_settings' %}"><i class="bi bi-gear"></i> Settings</a>
+</aside>

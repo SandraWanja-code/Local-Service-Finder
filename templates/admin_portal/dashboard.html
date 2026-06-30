@@ -1,0 +1,60 @@
+{% extends "admin_portal/base.html" %}
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="section-title mb-1">Dashboard Overview</h1>
+        <p class="muted mb-0">System health, requests, approvals, and recent activity.</p>
+    </div>
+    <a href="{% url 'admin_reports' %}" class="btn btn-primary"><i class="bi bi-download me-2"></i>Reports</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">{{ total_users }}</div><div class="muted">Total users</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">{{ total_clients }}</div><div class="muted">Clients</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">{{ total_providers }}</div><div class="muted">Providers</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">{{ total_requests }}</div><div class="muted">Service requests</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">{{ pending_requests }}</div><div class="muted">Pending requests</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">{{ completed_requests }}</div><div class="muted">Completed requests</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">{{ total_services }}</div><div class="muted">Services</div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card metric-card"><div class="metric-value">KSh {{ total_revenue }}</div><div class="muted">Recorded revenue</div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-7">
+        <div class="panel">
+            <h4>Recent Requests</h4>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Client</th><th>Service</th><th>Provider</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for req in recent_requests %}
+                        <tr>
+                            <td>{{ req.user.username }}</td>
+                            <td>{{ req.service.name }}</td>
+                            <td>{% if req.provider %}{{ req.provider.user.username }}{% else %}<span class="muted">Unassigned</span>{% endif %}</td>
+                            <td><span class="status-badge status-{{ req.status }}">{{ req.get_status_display }}</span></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-center muted py-4">No requests yet.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="panel mb-4">
+            <h4>Request Status</h4>
+            {% for row in status_counts %}
+                <div class="d-flex justify-content-between border-top py-2"><span class="text-capitalize">{{ row.status }}</span><strong>{{ row.total }}</strong></div>
+            {% empty %}<p class="muted mb-0">No chart data yet.</p>{% endfor %}
+        </div>
+        <div class="panel">
+            <h4>Notifications</h4>
+            {% for log in recent_logs %}
+                <div class="border-top py-2"><strong>{{ log.user.username }}</strong> {{ log.action }}<div class="muted small">{{ log.created_at|date:"M d, Y H:i" }}</div></div>
+            {% empty %}<p class="muted mb-0">No recent notifications.</p>{% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

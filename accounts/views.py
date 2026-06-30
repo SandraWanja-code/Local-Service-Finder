@@ -6,6 +6,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 from .models import ClientProfile, SessionLog
+from .decorators import client_required
+
+
+def _role_home(user):
+    if user.is_staff:
+        return "admin_dashboard"
+    if hasattr(user, "provider"):
+        return "provider_dashboard"
+    return "client_dashboard"
 
 
 def _client_ip(request):
@@ -67,7 +76,7 @@ def register(request):
         )
         messages.success(request, "Account created successfully. Confirmation message sent to your email address.")
 
-        return redirect("home")
+        return redirect("client_dashboard")
 
     return render(request, "register.html")
 
@@ -100,7 +109,7 @@ def login_view(request):
                 session_key=request.session.session_key or "",
                 ip_address=_client_ip(request),
             )
-            return redirect("home")
+            return redirect(_role_home(user))
         else:
             messages.error(request, "Invalid username or password")
 
@@ -117,6 +126,38 @@ def logout_view(request):
         )
     logout(request)
     return redirect("home")
+
+
+@client_required
+def profile(request):
+    profile_obj, _created = ClientProfile.objects.get_or_create(
+        user=request.user,
+        defaults={"phone": ""},
+    )
+
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        phone = request.POST.get("phone", "").strip()
+
+        if email and User.objects.exclude(id=request.user.id).filter(email__iexact=email).exists():
+            messages.error(request, "Email already exists")
+            return redirect("profile")
+
+        if phone and ClientProfile.objects.exclude(id=profile_obj.id).filter(phone=phone).exists():
+            messages.error(request, "Phone number already exists")
+            return redirect("profile")
+
+        request.user.first_name = request.POST.get("first_name", "").strip()
+        request.user.last_name = request.POST.get("last_name", "").strip()
+        request.user.email = email
+        request.user.save()
+
+        profile_obj.phone = phone
+        profile_obj.save()
+        messages.success(request, "Profile updated successfully.")
+        return redirect("profile")
+
+    return render(request, "accounts/profile.html", {"profile": profile_obj})
 
 
 

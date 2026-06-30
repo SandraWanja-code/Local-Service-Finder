@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Access Denied | Local Service Finder{% endblock %}
+{% block content %}
+<div class="panel text-center py-5">
+    <i class="bi bi-shield-lock h1 text-danger"></i>
+    <h1 class="section-title">Access denied</h1>
+    <p class="muted">You do not have permission to view this page.</p>
+    <a class="btn btn-primary" href="{% url 'role_redirect' %}">Go to Dashboard</a>
+</div>
+{% endblock %}

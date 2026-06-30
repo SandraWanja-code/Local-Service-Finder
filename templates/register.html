@@ -1,41 +1,27 @@
 {% extends 'base.html' %}
-
+{% block title %}Register | Local Service Finder{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-md-4">
-    <h2>Register</h2>
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label>Username</label> 
-        <input type="text" name="username" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label>First name</label>
-        <input type="text" name="first_name" class="form-control">
-      </div>
-      <div class="mb-3">
-        <label>Last name</label>
-        <input type="text" name="last_name" class="form-control">
-      </div>
-      <div class="mb-3">
-        <label>Email</label>
-        <input type="email" name="email" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label>Phone</label>
-        <input type="text" name="phone" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label>Password</label>
-        <input type="password" name="password" class="form-control" required>
-      </div>
-      <button type="submit" class="btn btn-success">Register</button>
-    </form>
-  </div>
-  <p class="mt-3">
-Already have an account?
-<a href="/accounts/login/">Login here</a>
-</p>
+    <div class="col-lg-7">
+        <div class="panel fade-in">
+            <div class="mb-4">
+                <h1 class="section-title h2">Create your client account</h1>
+                <p class="muted mb-0">You can apply to become a provider after registering.</p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Username</label><input type="text" name="username" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">First name</label><input type="text" name="first_name" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Last name</label><input type="text" name="last_name" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">Password</label><input type="password" name="password" class="form-control" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4">Create Account</button>
+            </form>
+            <p class="mt-4 mb-0">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+        </div>
+    </div>
 </div>
 {% endblock %}

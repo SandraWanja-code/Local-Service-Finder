@@ -1,0 +1,8 @@
+{% extends "admin_portal/base.html" %}
+{% block admin_content %}
+<div class="mb-4"><h1 class="section-title mb-1">Settings</h1><p class="muted mb-0">Application controls and operational defaults.</p></div>
+<div class="row g-4">
+    <div class="col-lg-6"><div class="panel"><h4>Notifications</h4><p class="muted">Toast notifications are enabled for system messages, approvals, service updates, and account actions.</p><button class="btn btn-outline-secondary" disabled>Email settings coming soon</button></div></div>
+    <div class="col-lg-6"><div class="panel"><h4>Platform Summary</h4><div class="d-flex justify-content-between border-top py-2"><span>Users</span><strong>{{ total_users }}</strong></div><div class="d-flex justify-content-between border-top py-2"><span>Providers</span><strong>{{ total_providers }}</strong></div><div class="d-flex justify-content-between border-top py-2"><span>Services</span><strong>{{ total_services }}</strong></div></div></div>
+</div>
+{% endblock %}

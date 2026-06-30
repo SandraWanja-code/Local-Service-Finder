@@ -1,0 +1,30 @@
+{% extends "admin_portal/base.html" %}
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1 class="section-title mb-1">Provider Approval</h1><p class="muted mb-0">Approve, reject, or review provider applications.</p></div>
+    <form method="get"><select name="status" class="form-select" onchange="this.form.submit()"><option value="">All statuses</option><option value="pending" {% if status == "pending" %}selected{% endif %}>Pending</option><option value="approved" {% if status == "approved" %}selected{% endif %}>Approved</option><option value="rejected" {% if status == "rejected" %}selected{% endif %}>Rejected</option></select></form>
+</div>
+<div class="row g-3">
+    {% for provider in providers %}
+        <div class="col-xl-6">
+            <div class="panel h-100">
+                <div class="d-flex justify-content-between gap-3">
+                    <div><h5>{{ provider.user.get_full_name|default:provider.user.username }}</h5><p class="muted mb-2">{{ provider.location }} · {{ provider.phone }}</p></div>
+                    <span class="status-badge status-{{ provider.approval_status }}">{{ provider.get_approval_status_display }}</span>
+                </div>
+                <p class="small">{{ provider.credentials|default:"No credentials provided." }}</p>
+                <div class="d-flex flex-wrap gap-1 mb-3">{% for service in provider.services.all %}<span class="badge text-bg-light border">{{ service.name }}</span>{% empty %}<span class="muted small">No services selected.</span>{% endfor %}</div>
+                <form method="post" class="d-flex flex-wrap gap-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="provider_id" value="{{ provider.id }}">
+                    <button class="btn btn-success btn-sm" name="action" value="approved" type="submit"><i class="bi bi-check2 me-1"></i>Approve</button>
+                    <button class="btn btn-outline-danger btn-sm" name="action" value="rejected" type="submit" data-confirm="Reject this provider?"><i class="bi bi-x-lg me-1"></i>Reject</button>
+                    <button class="btn btn-outline-secondary btn-sm" name="action" value="pending" type="submit">Mark Pending</button>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12"><div class="panel text-center py-5"><h5>No providers found</h5><p class="muted mb-0">Provider applications will appear here.</p></div></div>
+    {% endfor %}
+</div>
+{% endblock %}

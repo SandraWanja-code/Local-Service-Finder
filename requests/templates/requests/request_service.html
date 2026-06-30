@@ -1,127 +1,87 @@
 {% extends 'base.html' %}
-
+{% block title %}Request Service | Local Service Finder{% endblock %}
 {% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="section-title mb-1">Browse and Request Services</h1>
+        <p class="muted mb-0">Search approved providers, then submit a request with your preferred schedule.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'customer_requests' %}"><i class="bi bi-clock-history me-2"></i>My Requests</a>
+</div>
 
-<h2>Request a Service</h2>
-
-<form method="GET" class="p-3 mb-4 bg-light rounded">
-    <div class="row">
-        <div class="col-md-5 mb-2">
-            <label>Service category</label>
-            <select name="service_id" class="form-control">
-                <option value="">-- All services --</option>
+<form method="GET" class="panel mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label">Service category</label>
+            <select name="service_id" class="form-select">
+                <option value="">All services</option>
                 {% for service in services %}
                     <option value="{{ service.id }}" {% if selected_service_id == service.id|stringformat:"s" %}selected{% endif %}>{{ service.name }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-5 mb-2">
-            <label>Location</label>
+        <div class="col-md-5">
+            <label class="form-label">Location</label>
             <input type="text" name="location" value="{{ location_query }}" class="form-control" placeholder="Example: Nairobi">
         </div>
-        <div class="col-md-2 mb-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-secondary w-100">Search</button>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1"></i>Search</button>
         </div>
     </div>
 </form>
 
-{% if providers %}
-<h4>Available Providers</h4>
-<div class="list-group mb-4">
-    {% for provider in providers %}
-        <a class="list-group-item list-group-item-action" href="{% url 'provider_profile' provider.id %}">
-            <strong>{{ provider.user.get_full_name|default:provider.user.username }}</strong>
-            <br>
-            {{ provider.location }} | Rating: {{ provider.average_rating|floatformat:1|default:"No ratings yet" }}
-            {% if provider.hourly_rate %}| KSh {{ provider.hourly_rate }}{% endif %}
-        </a>
-    {% endfor %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="panel">
+            <h4>Available Providers</h4>
+            {% for provider in providers %}
+                <div class="border-top py-3">
+                    <div class="d-flex flex-wrap justify-content-between gap-3">
+                        <div>
+                            <a class="h5 mb-1 d-block" href="{% url 'provider_profile' provider.id %}">{{ provider.user.get_full_name|default:provider.user.username }}</a>
+                            <div class="muted">{{ provider.location }} · Rating {{ provider.average_rating|floatformat:1|default:"No ratings yet" }}</div>
+                            {% if provider.hourly_rate %}<div class="small">Price guide: KSh {{ provider.hourly_rate }}</div>{% endif %}
+                        </div>
+                        <a class="btn btn-outline-primary btn-sm align-self-start" href="{% url 'request_service' %}?provider_id={{ provider.id }}{% if selected_service_id %}&service_id={{ selected_service_id }}{% endif %}">Select</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-5">
+                    <i class="bi bi-search h1 text-primary"></i>
+                    <h5 class="mt-2">No matching providers</h5>
+                    <p class="muted mb-0">Try another service category or location.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <form method="POST" class="panel sticky-lg-top" style="top: 96px;">
+            {% csrf_token %}
+            <h4>Request Details</h4>
+            <label class="form-label">Service</label>
+            <select name="service_id" class="form-select mb-3" required>
+                <option value="">Choose a service</option>
+                {% for service in services %}
+                    <option value="{{ service.id }}" {% if selected_service_id == service.id|stringformat:"s" %}selected{% endif %}>{{ service.name }}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label">Preferred provider</label>
+            <select name="provider_id" class="form-select mb-3">
+                <option value="">Let any matching provider respond</option>
+                {% for provider in providers %}
+                    <option value="{{ provider.id }}" {% if selected_provider_id == provider.id|stringformat:"s" %}selected{% endif %}>{{ provider.user.get_full_name|default:provider.user.username }} - {{ provider.location }}</option>
+                {% endfor %}
+            </select>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Preferred date</label><input type="date" name="requested_date" class="form-control"></div>
+                <div class="col-md-6"><label class="form-label">Preferred time</label><input type="time" name="requested_time" class="form-control"></div>
+            </div>
+            <label class="form-label mt-3">Location</label>
+            <input type="text" name="location" class="form-control mb-3" placeholder="Where is the service needed?" required>
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control mb-4" rows="4" placeholder="Describe the work needed"></textarea>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-send me-2"></i>Submit Request</button>
+        </form>
+    </div>
 </div>
-{% endif %}
-
-{% if success %}
-
-<div class="alert alert-success">
-    Your service request has been submitted!
-</div>
-
-<h3>Matching Providers</h3>
-
-{% if matching_providers %}
-<ul>
-{% for provider in matching_providers %}
-<li>
-
-<strong>{{ provider.user.username }}</strong><br>
-Location: {{ provider.location }}<br>
-Phone: {{ provider.phone }}<br>
-
-{% if provider.profile_image %}
-    <img src="{{ provider.profile_image.url }}" width="120" style="margin-top:10px;">
-{% else %}
-    <p>No image available</p>
-{% endif %}
-
-</li>
-<br>
-{% endfor %}
-</ul>
-
-{% else %}
-<p>No providers found for this service yet.</p>
-{% endif %}
-
-{% else %}
-
-<form method="POST" enctype="multipart/form-data">
-{% csrf_token %}
-
-<div class="mb-3">
-<label>Select Service</label>
-
-<select name="service_id" class="form-control" required>
-    <option value="">-- Choose a service --</option>
-    {% for service in services %}
-        <option value="{{ service.id }}" {% if selected_service_id == service.id|stringformat:"s" %}selected{% endif %}>{{ service.name }}</option>
-    {% endfor %}
-</select>
-
-</div>
-
-<div class="mb-3">
-<label>Preferred Provider (optional)</label>
-<select name="provider_id" class="form-control">
-    <option value="">-- Let any matching provider respond --</option>
-    {% for provider in providers %}
-        <option value="{{ provider.id }}" {% if selected_provider_id == provider.id|stringformat:"s" %}selected{% endif %}>{{ provider.user.get_full_name|default:provider.user.username }} - {{ provider.location }}</option>
-    {% endfor %}
-</select>
-</div>
-
-<div class="mb-3">
-<label>Preferred Date</label>
-<input type="date" name="requested_date" class="form-control">
-</div>
-
-<div class="mb-3">
-<label>Preferred Time</label>
-<input type="time" name="requested_time" class="form-control">
-</div>
-
-<div class="mb-3">
-<label>Description</label>
-<textarea name="description" class="form-control"></textarea>
-</div>
-
-<div class="mb-3">
-<label>Location</label>
-<input type="text" name="location" class="form-control">
-</div>
-
-<button type="submit" class="btn btn-primary">Submit</button>
-
-</form>
-
-{% endif %}
-
 {% endblock %}

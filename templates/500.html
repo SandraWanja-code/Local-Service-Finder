@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Server Error | Local Service Finder{% endblock %}
+{% block content %}
+<div class="panel text-center py-5">
+    <i class="bi bi-exclamation-triangle h1 text-warning"></i>
+    <h1 class="section-title">Something went wrong</h1>
+    <p class="muted">Please try again, or contact support if the issue continues.</p>
+    <a class="btn btn-primary" href="{% url 'home' %}">Back Home</a>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found | Local Service Finder{% endblock %}
+{% block content %}
+<div class="panel text-center py-5">
+    <i class="bi bi-compass h1 text-primary"></i>
+    <h1 class="section-title">Page not found</h1>
+    <p class="muted">The page you are looking for does not exist or has moved.</p>
+    <a class="btn btn-primary" href="{% url 'home' %}">Back Home</a>
+</div>
+{% endblock %}

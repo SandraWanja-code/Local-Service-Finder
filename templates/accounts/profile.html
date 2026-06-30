@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My Profile | Local Service Finder{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="panel mb-4">
+            <h1 class="section-title h2">My Profile</h1>
+            <p class="muted">Update your client account details and contact information.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">First name</label><input class="form-control" name="first_name" value="{{ user.first_name }}"></div>
+                    <div class="col-md-6"><label class="form-label">Last name</label><input class="form-control" name="last_name" value="{{ user.last_name }}"></div>
+                    <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" name="email" value="{{ user.email }}"></div>
+                    <div class="col-md-6"><label class="form-label">Phone</label><input class="form-control" name="phone" value="{{ profile.phone }}"></div>
+                </div>
+                <button class="btn btn-primary mt-4" type="submit">Save Profile</button>
+            </form>
+        </div>
+        <div class="panel border-danger">
+            <h4>Account Deletion</h4>
+            <p class="muted">This permanently removes your account and related records.</p>
+            <form method="POST" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger" type="submit" data-confirm="Permanently delete your account?">Delete Account</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

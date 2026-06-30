@@ -8,12 +8,13 @@ from django.utils import timezone
 from services.models import Service, Provider
 from .models import ServiceRequest, SearchHistory, ProviderSelection
 from accounts.models import AccessLog
+from accounts.decorators import client_required
 
 
 # ===============================
 # REQUEST A SERVICE
 # ===============================
-@login_required
+@client_required
 def request_service(request):
     services = Service.objects.filter(is_active=True)
     providers = Provider.objects.filter(approval_status="approved", is_available=True)
@@ -105,9 +106,9 @@ def request_service(request):
 # ===============================
 # CUSTOMER REQUESTS (VIEW + PAY STATUS ONLY)
 # ===============================
-@login_required
+@client_required
 def customer_requests(request):
-    requests_qs = ServiceRequest.objects.filter(user=request.user).order_by("-requested_at")
+    requests_qs = ServiceRequest.objects.filter(user=request.user, deleted=False).order_by("-requested_at")
 
     AccessLog.objects.create(
         user=request.user,
@@ -172,7 +173,7 @@ def provider_dashboard(request):
 # ===============================
 # DELETE REQUEST (SOFT DELETE)
 # ===============================
-@login_required
+@client_required
 def delete_request(request, request_id):
     req = get_object_or_404(ServiceRequest, id=request_id, user=request.user)
     req.deleted = True

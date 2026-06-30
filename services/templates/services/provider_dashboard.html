@@ -1,88 +1,82 @@
 {% extends "base.html" %}
+{% block title %}Provider Dashboard | Local Service Finder{% endblock %}
 {% block content %}
-
-<h2 style="color:#007bff;">Incoming Service Requests</h2>
-
-<div class="alert alert-info">
-    <strong>Total recorded earnings:</strong> KSh {{ earnings }}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1 class="section-title mb-1">Provider Dashboard</h1><p class="muted mb-0">Incoming requests, active work, completed jobs, and payments.</p></div>
+    <a href="{% url 'my_services' %}" class="btn btn-outline-secondary"><i class="bi bi-gear me-2"></i>Manage Services</a>
 </div>
 
-<div id="requests-container">
-    {% if requests %}
-        {% for req in requests %}
-        <div style="background-color:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #dee2e6;">
-            <p><strong>Customer:</strong> {{ req.user.username }}</p>
-            <p><strong>Service:</strong> {{ req.service.name }}</p>
-            <p><strong>Description:</strong> {{ req.description }}</p>
-            <p><strong>Location:</strong> {{ req.location }}</p>
-            {% if req.requested_date %}<p><strong>Preferred Date:</strong> {{ req.requested_date }}</p>{% endif %}
-            {% if req.requested_time %}<p><strong>Preferred Time:</strong> {{ req.requested_time }}</p>{% endif %}
-            <p><strong>Status:</strong> {{ req.status }}</p>
-            <p><strong>Requested At:</strong> {{ req.requested_at|date:"M d, Y H:i" }}</p>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card metric-card"><span class="metric-icon mb-2"><i class="bi bi-cash-stack"></i></span><div class="metric-value">KSh {{ earnings }}</div><div class="muted">Recorded earnings</div></div></div>
+    <div class="col-md-4"><div class="card metric-card"><span class="metric-icon mb-2"><i class="bi bi-inbox"></i></span><div class="metric-value">{{ requests|length }}</div><div class="muted">Visible requests</div></div></div>
+    <div class="col-md-4"><div class="card metric-card"><span class="metric-icon mb-2"><i class="bi bi-person-check"></i></span><div class="metric-value">Approved</div><div class="muted">Provider status</div></div></div>
+</div>
+
+<div class="row g-3">
+{% for req in requests %}
+    <div class="col-xl-6">
+        <div class="panel h-100">
+            <div class="d-flex justify-content-between gap-3 mb-3">
+                <div><h4 class="mb-1">{{ req.service.name }}</h4><div class="muted">{{ req.requested_at|date:"M d, Y H:i" }}</div></div>
+                <span class="status-badge status-{{ req.status }}">{{ req.get_status_display }}</span>
+            </div>
+            <p class="mb-1"><strong>Client:</strong> {{ req.user.get_full_name|default:req.user.username }}</p>
+            <p class="mb-1"><strong>Location:</strong> {{ req.location }}</p>
+            {% if req.description %}<p class="mb-1"><strong>Description:</strong> {{ req.description }}</p>{% endif %}
+            {% if req.requested_date %}<p class="mb-1"><strong>Preferred date:</strong> {{ req.requested_date }}</p>{% endif %}
+            {% if req.requested_time %}<p class="mb-1"><strong>Preferred time:</strong> {{ req.requested_time }}</p>{% endif %}
 
             {% if req.status == 'pending' %}
-                <form method="POST" style="margin-top:10px;">
+                <form method="POST" class="border-top mt-3 pt-3">
                     {% csrf_token %}
                     <input type="hidden" name="request_id" value="{{ req.id }}">
-                    <button name="action" value="accept" style="background-color:#28a745; color:white; border:none; padding:6px 10px; border-radius:5px;">Accept</button>
-                    <input type="text" name="decline_reason" placeholder="Optional decline reason" style="padding:6px; margin-left:6px;">
-                    <button name="action" value="decline" style="background-color:#dc3545; color:white; border:none; padding:6px 10px; border-radius:5px;">Decline</button>
+                    <label class="form-label">Decline reason</label>
+                    <input type="text" name="decline_reason" class="form-control mb-2" placeholder="Optional">
+                    <div class="d-flex gap-2">
+                        <button name="action" value="accept" class="btn btn-success" type="submit"><i class="bi bi-check2 me-1"></i>Accept</button>
+                        <button name="action" value="decline" class="btn btn-outline-danger" type="submit" data-confirm="Decline this request?"><i class="bi bi-x-lg me-1"></i>Decline</button>
+                    </div>
                 </form>
             {% elif req.status == 'accepted' %}
-                <form method="POST" style="margin-top:10px;">
+                <form method="POST" class="border-top mt-3 pt-3 d-flex gap-2">
                     {% csrf_token %}
                     <input type="hidden" name="request_id" value="{{ req.id }}">
-                    <button name="action" value="complete" style="background-color:#007bff; color:white; border:none; padding:6px 10px; border-radius:5px;">Mark Completed</button>
+                    <button name="action" value="in_progress" class="btn btn-primary" type="submit">Start Work</button>
+                    <button name="action" value="complete" class="btn btn-outline-success" type="submit">Mark Completed</button>
+                </form>
+            {% elif req.status == 'in_progress' %}
+                <form method="POST" class="border-top mt-3 pt-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                    <button name="action" value="complete" class="btn btn-success" type="submit">Mark Completed</button>
                 </form>
             {% endif %}
 
             {% if req.status == "completed" %}
-                <p><strong>Payment:</strong> {{ req.payment_status }}</p>
-                {% if req.payment_status == "unpaid" %}
-                    <form method="POST" class="p-3 bg-white border rounded">
-                        {% csrf_token %}
-                        <input type="hidden" name="request_id" value="{{ req.id }}">
-                        <label>Payment Method</label>
-                        <select name="payment_method" class="form-control mb-2" required>
-                            <option value="">Select method</option>
-                            <option value="cash">Cash</option>
-                            <option value="mpesa">M-Pesa</option>
-                        </select>
-                        <label>Amount Paid</label>
-                        <input type="number" step="0.01" name="amount_paid" class="form-control mb-2" required>
-                        <label>M-Pesa Code / SMS Reference</label>
-                        <input type="text" name="mpesa_code" class="form-control mb-2">
-                        <button name="action" value="record_payment" class="btn btn-success btn-sm">Record Payment</button>
-                    </form>
-                {% else %}
-                    <p><strong>Method:</strong> {{ req.get_payment_method_display }}</p>
-                    <p><strong>Amount:</strong> KSh {{ req.amount_paid }}</p>
-                    {% if req.mpesa_code %}<p><strong>M-Pesa Code:</strong> {{ req.mpesa_code }}</p>{% endif %}
-                {% endif %}
-                
-                {% if req.rating %}
-                <p>
-                    ⭐ Customer Rating: 
-                    {% for i in "12345"|slice:":req.rating"|make_list %}
-                        ⭐
-                    {% endfor %}
-                    ({{ req.rating }}/5)
-                </p>
-                {% if req.review %}<p><strong>Review:</strong> {{ req.review }}</p>{% endif %}
-                {% endif %}
-
-                {% if req.complaint %}
-                    <div class="alert alert-warning">
-                        <strong>Complaint:</strong> {{ req.complaint }}<br>
-                        <strong>Status:</strong> {{ req.get_complaint_status_display }}
-                    </div>
-                {% endif %}
+                <div class="border-top mt-3 pt-3">
+                    <p><strong>Payment:</strong> <span class="status-badge status-{{ req.payment_status }}">{{ req.get_payment_status_display }}</span></p>
+                    {% if req.payment_status == "unpaid" %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="request_id" value="{{ req.id }}">
+                            <div class="row g-2">
+                                <div class="col-md-6"><label class="form-label">Method</label><select name="payment_method" class="form-select" required><option value="">Select</option><option value="cash">Cash</option><option value="mpesa">M-Pesa</option></select></div>
+                                <div class="col-md-6"><label class="form-label">Amount</label><input type="number" step="0.01" name="amount_paid" class="form-control" required></div>
+                            </div>
+                            <label class="form-label mt-2">M-Pesa code / reference</label>
+                            <input type="text" name="mpesa_code" class="form-control mb-2">
+                            <button name="action" value="record_payment" class="btn btn-success btn-sm" type="submit">Record Payment</button>
+                        </form>
+                    {% endif %}
+                    {% if req.rating %}<p class="mt-3"><strong>Customer rating:</strong> {{ req.rating }}/5</p>{% endif %}
+                    {% if req.review %}<p><strong>Review:</strong> {{ req.review }}</p>{% endif %}
+                    {% if req.complaint %}<div class="alert alert-warning"><strong>Complaint:</strong> {{ req.complaint }}<br><strong>Status:</strong> {{ req.get_complaint_status_display }}</div>{% endif %}
+                </div>
             {% endif %}
         </div>
-        {% endfor %}
-    {% else %}
-        <p>No incoming requests yet.</p>
-    {% endif %}
+    </div>
+{% empty %}
+    <div class="col-12"><div class="panel text-center py-5"><i class="bi bi-inbox h1 text-primary"></i><h4>No incoming requests yet</h4><p class="muted mb-0">Requests matching your services will appear here.</p></div></div>
+{% endfor %}
 </div>
-
 {% endblock %}

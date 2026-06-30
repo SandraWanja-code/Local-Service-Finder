@@ -1,24 +1,24 @@
 {% extends 'base.html' %}
+{% block title %}Login | Local Service Finder{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-md-4">
-    <h2>Login</h2>
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label>Username or email</label>
-        <input type="text" name="username" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label>Password</label>
-        <input type="password" name="password" class="form-control" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Login</button>
-    </form>
-    <p class="mt-3">
-Don't have an account?
-<a href="/accounts/register/">Sign up here</a>
-</p>
-  </div>
+    <div class="col-lg-5 col-md-7">
+        <div class="panel fade-in">
+            <div class="text-center mb-4">
+                <span class="feature-icon mb-3"><i class="bi bi-box-arrow-in-right"></i></span>
+                <h1 class="section-title h2">Welcome back</h1>
+                <p class="muted mb-0">Login to continue to your role-based dashboard.</p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <label class="form-label">Username or email</label>
+                <input type="text" name="username" class="form-control mb-3" autocomplete="username" required>
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control mb-4" autocomplete="current-password" required>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+            <p class="text-center mt-4 mb-0">New here? <a href="{% url 'register' %}">Create an account</a></p>
+        </div>
+    </div>
 </div>
 {% endblock %}

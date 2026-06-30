@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Admin Portal | Local Service Finder{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+    {% include "admin_portal/_sidebar.html" %}
+    <section>
+        {% block admin_content %}{% endblock %}
+    </section>
+</div>
+{% endblock %}

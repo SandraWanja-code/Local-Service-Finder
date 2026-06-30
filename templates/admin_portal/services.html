@@ -1,0 +1,46 @@
+{% extends "admin_portal/base.html" %}
+{% block admin_content %}
+<div class="mb-4"><h1 class="section-title mb-1">Service Management</h1><p class="muted mb-0">Add, update, and monitor service categories.</p></div>
+<div class="row g-4">
+    <div class="col-lg-4">
+        <form method="post" class="panel">
+            {% csrf_token %}
+            <h4>Add Service</h4>
+            <label class="form-label">Name</label>
+            <input class="form-control mb-3" name="name" required>
+            <label class="form-label">Description</label>
+            <textarea class="form-control mb-3" name="description" rows="4"></textarea>
+            <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" name="is_active" id="newActive" checked><label class="form-check-label" for="newActive">Active</label></div>
+            <button class="btn btn-primary" type="submit">Save Service</button>
+        </form>
+    </div>
+    <div class="col-lg-8">
+        <div class="panel table-responsive">
+            <table class="table">
+                <thead><tr><th>Service</th><th>Providers</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                {% for service in services %}
+                    <tr>
+                        <td><strong>{{ service.name }}</strong><div class="muted small">{{ service.description|truncatechars:80 }}</div></td>
+                        <td>{{ service.provider_count }}</td>
+                        <td>{% if service.is_active %}<span class="status-badge status-approved">Active</span>{% else %}<span class="status-badge status-rejected">Inactive</span>{% endif %}</td>
+                        <td>
+                            <form method="post" class="d-flex gap-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="service_id" value="{{ service.id }}">
+                                <input type="hidden" name="name" value="{{ service.name }}">
+                                <input type="hidden" name="description" value="{{ service.description }}">
+                                <input type="checkbox" name="is_active" class="d-none" {% if not service.is_active %}checked{% endif %}>
+                                <button class="btn btn-outline-secondary btn-sm" type="submit">{% if service.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-center muted py-4">No services configured.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

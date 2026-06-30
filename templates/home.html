@@ -1,28 +1,87 @@
 {% extends "base.html" %}
-
+{% block title %}Local Service Finder | Trusted Help Nearby{% endblock %}
+{% block main_class %}app-container p-0{% endblock %}
 {% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-8 fade-in">
+                <span class="badge text-bg-warning mb-3">Trusted local services, one request away</span>
+                <h1>Local Service Finder</h1>
+                <p class="lead mt-3">Book vetted providers, track requests, and manage every job from a clean role-based dashboard built for clients, providers, and administrators.</p>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'role_redirect' %}" class="btn btn-warning btn-lg"><i class="bi bi-speedometer2 me-2"></i>Go to Dashboard</a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-warning btn-lg"><i class="bi bi-rocket-takeoff me-2"></i>Get Started</a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg"><i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="d-grid gap-3">
+                    <div class="hero-stat"><strong class="d-block h3 mb-0">{{ services|length }}+</strong><span>service categories featured</span></div>
+                    <div class="hero-stat"><strong class="d-block h3 mb-0">{{ providers|length }}+</strong><span>approved providers highlighted</span></div>
+                    <div class="hero-stat"><strong class="d-block h3 mb-0">24/7</strong><span>self-service request tracking</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<!-- Welcome Section -->
+<section id="features" class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="section-title">A smoother way to get work done</h2>
+        <p class="muted">Clean workflows for every role, without mixing client and provider tools.</p>
+    </div>
+    <div class="feature-grid">
+        <div class="panel"><span class="feature-icon mb-3"><i class="bi bi-search"></i></span><h5>Smart Search</h5><p class="muted mb-0">Find services by category and location, then choose a provider or let matching providers respond.</p></div>
+        <div class="panel"><span class="feature-icon mb-3"><i class="bi bi-shield-check"></i></span><h5>Approved Providers</h5><p class="muted mb-0">Administrators can review, approve, reject, and monitor provider activity.</p></div>
+        <div class="panel"><span class="feature-icon mb-3"><i class="bi bi-kanban"></i></span><h5>Request Tracking</h5><p class="muted mb-0">Clients and providers see only the request actions relevant to their role.</p></div>
+        <div class="panel"><span class="feature-icon mb-3"><i class="bi bi-star"></i></span><h5>Reviews</h5><p class="muted mb-0">Completed paid work can be rated, reviewed, and escalated through complaints.</p></div>
+    </div>
+</section>
 
-<div class="p-5 mb-4 bg-light rounded text-center">
+<section id="how-it-works" class="bg-white border-top border-bottom py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-4">How It Works</h2>
+        <div class="row g-3">
+            <div class="col-md-4"><div class="panel h-100"><span class="badge text-bg-primary mb-3">1</span><h5>Create an account</h5><p class="muted mb-0">Register as a client, or apply to become a provider from your account.</p></div></div>
+            <div class="col-md-4"><div class="panel h-100"><span class="badge text-bg-primary mb-3">2</span><h5>Submit or receive requests</h5><p class="muted mb-0">Clients request help; approved providers accept, reject, and update jobs.</p></div></div>
+            <div class="col-md-4"><div class="panel h-100"><span class="badge text-bg-primary mb-3">3</span><h5>Complete and review</h5><p class="muted mb-0">Payments, reviews, complaints, and history stay organized in dashboards.</p></div></div>
+        </div>
+    </div>
+</section>
 
-<h1>Welcome {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %} 👋</h1>
+<section class="container py-5">
+    <div class="row g-3">
+        <div class="col-md-4"><div class="panel h-100"><p>"The request tracker makes follow-up simple and transparent."</p><strong>Mary K.</strong><div class="muted">Homeowner</div></div></div>
+        <div class="col-md-4"><div class="panel h-100"><p>"Provider approvals and reports finally feel manageable."</p><strong>Admin Team</strong><div class="muted">Operations</div></div></div>
+        <div class="col-md-4"><div class="panel h-100"><p>"I can focus on jobs instead of searching through messages."</p><strong>James O.</strong><div class="muted">Electrician</div></div></div>
+    </div>
+</section>
 
-<p class="lead">
-Find trusted local service providers near you.
-</p>
+<section id="contact" class="bg-white py-5">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-7">
+                <h2 class="section-title">Need help getting started?</h2>
+                <p class="muted mb-0">Contact support for account, provider approval, or service request questions.</p>
+            </div>
+            <div class="col-lg-5">
+                <div class="panel">
+                    <p class="mb-2"><i class="bi bi-envelope me-2 text-primary"></i>support@localservicefinder.test</p>
+                    <p class="mb-0"><i class="bi bi-telephone me-2 text-primary"></i>+254 700 000 000</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<a href="/requests/request/" class="btn btn-primary btn-lg me-2">
-Request a Service
-</a>
-
-<a href="/services/become-provider/" class="btn btn-success btn-lg">
-Provide a Service
-</a>
-
-
-</div>
-
-
-
+<footer class="py-4 bg-dark text-white">
+    <div class="container d-flex flex-wrap justify-content-between gap-2">
+        <span>Local Service Finder</span>
+        <span class="text-white-50">Modern service booking for local communities.</span>
+    </div>
+</footer>
 {% endblock %}

@@ -1,34 +1,45 @@
 {% extends "base.html" %}
-
+{% block title %}{{ provider.user.get_full_name|default:provider.user.username }} | Local Service Finder{% endblock %}
 {% block content %}
-
-<h2>{{ provider.user.username }}</h2>
-
-<p><strong>Location:</strong> {{ provider.location }}</p>
-
-<p><strong>Phone:</strong> {{ provider.phone }}</p>
-<p><strong>Approval:</strong> {{ provider.get_approval_status_display }}</p>
-<p><strong>Availability:</strong> {% if provider.is_available %}Available{% else %}Not available{% endif %}</p>
-{% if provider.availability %}<p><strong>Schedule:</strong> {{ provider.availability }}</p>{% endif %}
-{% if provider.hourly_rate %}<p><strong>Price Guide:</strong> KSh {{ provider.hourly_rate }}</p>{% endif %}
-{% if provider.credentials %}<p><strong>Credentials:</strong> {{ provider.credentials }}</p>{% endif %}
-{% if provider.portfolio %}<p><strong>Portfolio:</strong> {{ provider.portfolio }}</p>{% endif %}
-<p><strong>Rating:</strong> {{ provider.average_rating|floatformat:1|default:"No ratings yet" }}</p>
-
-{% if provider.profile_image %}
-<img src="{{ provider.profile_image.url }}" alt="Provider profile image" width="160" class="mb-3">
-{% endif %}
-
-{% if user.is_authenticated and not user.is_provider and provider.approval_status == "approved" and provider.is_available %}
-<a class="btn btn-primary mb-3" href="{% url 'request_service' %}?provider_id={{ provider.id }}">Book this provider</a>
-{% endif %}
-
-<h4>Services Offered</h4>
-
-<ul>
-{% for service in provider.services.all %}
-<li>{{ service.name }}</li>
-{% endfor %}
-</ul>
-
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="panel text-center">
+            {% if provider.profile_image %}
+                <img src="{{ provider.profile_image.url }}" alt="Provider profile image" class="rounded-circle object-fit-cover mb-3" width="140" height="140">
+            {% else %}
+                <span class="feature-icon mb-3" style="height: 96px; width: 96px; font-size: 2rem;"><i class="bi bi-person"></i></span>
+            {% endif %}
+            <h1 class="h3 section-title">{{ provider.user.get_full_name|default:provider.user.username }}</h1>
+            <p class="muted">{{ provider.location }}</p>
+            <span class="status-badge status-{{ provider.approval_status }}">{{ provider.get_approval_status_display }}</span>
+            <p class="mt-3 mb-1"><strong>Rating:</strong> {{ provider.average_rating|floatformat:1|default:"No ratings yet" }}</p>
+            {% if provider.hourly_rate %}<p><strong>Price guide:</strong> KSh {{ provider.hourly_rate }}</p>{% endif %}
+            {% if user.is_authenticated and not user.is_provider and not user.is_staff and provider.approval_status == "approved" and provider.is_available %}
+                <a class="btn btn-primary w-100 mt-3" href="{% url 'request_service' %}?provider_id={{ provider.id }}"><i class="bi bi-calendar-plus me-2"></i>Book Provider</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="panel mb-4">
+            <h4>Provider Details</h4>
+            <div class="row g-3">
+                <div class="col-md-6"><strong>Phone</strong><div class="muted">{{ provider.phone }}</div></div>
+                <div class="col-md-6"><strong>Availability</strong><div class="muted">{% if provider.is_available %}Available{% else %}Not available{% endif %}</div></div>
+                {% if provider.availability %}<div class="col-12"><strong>Schedule</strong><p class="muted mb-0">{{ provider.availability }}</p></div>{% endif %}
+                {% if provider.credentials %}<div class="col-12"><strong>Credentials</strong><p class="muted mb-0">{{ provider.credentials }}</p></div>{% endif %}
+                {% if provider.portfolio %}<div class="col-12"><strong>Portfolio</strong><p class="muted mb-0">{{ provider.portfolio }}</p></div>{% endif %}
+            </div>
+        </div>
+        <div class="panel">
+            <h4>Services Offered</h4>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                {% for service in provider.services.all %}
+                    <a class="badge rounded-pill text-bg-light border p-2" href="{% url 'providers_by_service' service.id %}">{{ service.name }}</a>
+                {% empty %}
+                    <p class="muted mb-0">No services listed yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,26 @@
+{% extends "admin_portal/base.html" %}
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1 class="section-title mb-1">Request Management</h1><p class="muted mb-0">Review service requests, payments, reviews, and complaints.</p></div>
+    <form method="get"><select class="form-select" name="status" onchange="this.form.submit()"><option value="">All statuses</option><option value="pending" {% if status == "pending" %}selected{% endif %}>Pending</option><option value="accepted" {% if status == "accepted" %}selected{% endif %}>Accepted</option><option value="in_progress" {% if status == "in_progress" %}selected{% endif %}>In Progress</option><option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option><option value="declined" {% if status == "declined" %}selected{% endif %}>Declined</option></select></form>
+</div>
+<div class="panel table-responsive">
+    <table class="table">
+        <thead><tr><th>Client</th><th>Service</th><th>Provider</th><th>Status</th><th>Payment</th><th>Complaint</th></tr></thead>
+        <tbody>
+        {% for req in requests %}
+            <tr>
+                <td>{{ req.user.username }}</td>
+                <td>{{ req.service.name }}<div class="muted small">{{ req.requested_at|date:"M d, Y H:i" }}</div></td>
+                <td>{% if req.provider %}{{ req.provider.user.username }}{% else %}<span class="muted">Unassigned</span>{% endif %}</td>
+                <td><span class="status-badge status-{{ req.status }}">{{ req.get_status_display }}</span></td>
+                <td><span class="status-badge status-{{ req.payment_status }}">{{ req.get_payment_status_display }}</span></td>
+                <td>{% if req.complaint %}<span class="status-badge status-pending">{{ req.get_complaint_status_display }}</span>{% else %}<span class="muted">None</span>{% endif %}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="text-center muted py-4">No requests found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

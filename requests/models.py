@@ -7,6 +7,7 @@ class ServiceRequest(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
+        ('in_progress', 'In Progress'),
         ('declined', 'Declined'),
         ('completed', 'Completed'),
     ]

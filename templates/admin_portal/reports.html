@@ -1,0 +1,14 @@
+{% extends "admin_portal/base.html" %}
+{% block admin_content %}
+<div class="mb-4"><h1 class="section-title mb-1">Reports and Statistics</h1><p class="muted mb-0">Operational summary and recent session activity.</p></div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card metric-card"><div class="metric-value">{{ total_requests }}</div><div class="muted">Requests</div></div></div>
+    <div class="col-md-3"><div class="card metric-card"><div class="metric-value">{{ completed_requests }}</div><div class="muted">Completed</div></div></div>
+    <div class="col-md-3"><div class="card metric-card"><div class="metric-value">{{ pending_requests }}</div><div class="muted">Pending</div></div></div>
+    <div class="col-md-3"><div class="card metric-card"><div class="metric-value">KSh {{ total_revenue }}</div><div class="muted">Revenue</div></div></div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-5"><div class="panel"><h4>Status Breakdown</h4>{% for row in status_counts %}<div class="d-flex justify-content-between border-top py-2"><span class="text-capitalize">{{ row.status }}</span><strong>{{ row.total }}</strong></div>{% empty %}<p class="muted mb-0">No request data.</p>{% endfor %}</div></div>
+    <div class="col-lg-7"><div class="panel"><h4>Session Logs</h4>{% for log in session_logs %}<div class="d-flex justify-content-between border-top py-2"><span>{{ log.user.username }} {{ log.action }}</span><span class="muted">{{ log.created_at|date:"M d, H:i" }}</span></div>{% empty %}<p class="muted mb-0">No session logs.</p>{% endfor %}</div></div>
+</div>
+{% endblock %}
